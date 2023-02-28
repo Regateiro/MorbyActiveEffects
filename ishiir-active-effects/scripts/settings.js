@@ -66,15 +66,16 @@ class Settings {
         for (const effect of Object.keys(EFFECTS)) {
             const actorId = getIAESetting("selectedActor");
             const state = getIAESetting(effect);
+            const effectId = game.actors.get(actorId)?.flags?.iae[effect];
 
             // If the effect needs to be applied/removed from the actor
-            if(Boolean(game.actors.get(actorId)?.flags?.iae[effect]) !== state) {
+            if(Boolean(effectId) !== state) {
                 if(state) {
                     // Apply the effect if it is wanted
                     this.manager.registerEffect(EFFECTS[effect], actorId).then();
                 } else {
                     // Remove the effect if it is not wanted
-                    this.manager.unregisterEffect(EFFECTS[effect], actorId).then();
+                    this.manager.unregisterEffect(effectId, actorId).then();
                 }
             }
         }

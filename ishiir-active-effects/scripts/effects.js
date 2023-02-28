@@ -1,10 +1,15 @@
-// Supported fields
+/**
+ * Supported Effects
+ */
 export const EFFECTS = {
     blade_mastery: "Blade Mastery",
     giants_might: "Giant's Might",
     greater_rage: "Greater Rage"
 };
 
+/**
+ * List of effect modes
+ */
 const EFFECT_MODE = {
     CUSTOM: 0,
     MULTIPLY: 1,
@@ -14,12 +19,19 @@ const EFFECT_MODE = {
     OVERRIDE: 5
 };
 
+/**
+ * Ishiir Effects Manager
+ */
 export class IshiirEffectManager {
     constructor() {
+        // Retrieve the Active Effect Manager module API
         this._API = game.modules.get("active-effect-manager-lib").api;
         this._EFFECTS = {};
     };
 
+    /**
+     * Initialize all the effects
+     */
     async init() {
         // Ensure flags exist for all actors owned by the user
         await this.ensureFlags();
@@ -61,26 +73,32 @@ export class IshiirEffectManager {
         }
     }
     
-    async unregisterEffect(effectName, actorId) {
-        if(await this._API.findEffectByNameOnActor(actorId, effectName)) {
-            const key = Object.keys(EFFECTS).find(key => EFFECTS[key] === effectName);
-            await game.actors.get(actorId).update({["flags.iae." + key]: null});
-            await this._API.removeEffectOnActor(actorId, effectName);
+    /**
+     * Unregister an effect from an actor.
+     * @param {*} effectId The id of the effect to unregister.
+     * @param {*} actorId The id of the actor to unregister the effect from.
+     */
+    async unregisterEffect(effectId, actorId) {
+        if(await this._API.findEffectByIdOnActor(actorId, effectId)) {
+            const actor = game.actors.get(actorId);
+            const key = Object.keys(actor.flags.iae).find(key => actor.flags.iae[key] === effectId);
+            await actor.update({["flags.iae." + key]: null});
+            await this._API.removeEffectFromIdOnActor(actorId, effectId);
         }
     }
 
-    async ensureFlags(actors) {
+    /**
+     * Ensure flags exist for all actors owned by the user.
+     * @param {*} actors Optional list of actors to ensure flags on.
+     */
+    async ensureFlags(actors = game.actors) {
         const flags = {};
         const futures = [];
-
-        if(!actors) {
-            actors = game.actors.filter((actor) => actor.isOwner);
-        }
 
         // Update owned actors so they have flags defined
         actors.filter((actor) => actor.isOwner).forEach((actor) => {
             for (const effect of Object.keys(EFFECTS)) {
-                if(!actor.flags.iae || !actor.flags.iae[effect]) {
+                if(!actor.flags?.iae || !actor.flags?.iae[effect]) {
                     flags["flags.iae." + effect] = null;
                 }
             }
