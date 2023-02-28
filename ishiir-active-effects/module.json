@@ -1,0 +1,54 @@
+{
+    "id": "ishiir-active-effects",
+    "title": "Ishiir Active Effects",
+    "description": "This module provides a collection of active effects for use in the world of Ishiir.",
+    "authors": [
+        {
+            "name": "regateiro",
+            "email": "diogo.regateiro@gmail.com",
+            "url": "https://github.com/Regateiro"
+        }
+    ],
+    "url": "https://github.com/Regateiro/IshiirActiveEffects/tree/master/ishiir-active-effects",
+    "version": "0.0.1",
+    "compatibility": {
+        "minimum": "10.291",
+        "verified": "10"
+    },
+    "esmodules": [
+        "./scripts/ishiir-active-effects.js"
+    ],
+    "relationships": {
+        "systems": [
+            {
+                "id": "dnd5e",
+                "compatibility": {
+                    "minimum": "2.1.1",
+                    "verified": "2.1.5"
+                }
+            }
+        ],
+        "requires": [
+            {
+                "id": "active-effect-manager-lib",
+                "type": "module",
+                "manifest": "https://github.com/p4535992/foundryvtt-active-effect-manager-lib/releases/latest/download/module.json",
+                "compatibility": {
+                    "minimum": "0.1.24",
+                    "verified": "0.1.24"
+                }
+            },
+            {
+                "id": "ATL",
+                "type": "module",
+                "manifest": "https://github.com/kandashi/Active-Token-Lighting/releases/latest/download/module.json",
+                "compatibility": {
+                    "minimum": "0.5.1",
+                    "verified": "0.5.1"
+                }
+            }
+        ]
+    },
+    "manifest": "https://github.com/Regateiro/IshiirActiveEffects/releases/download/v0.0.1/module.json",
+    "download": "https://github.com/Regateiro/IshiirActiveEffects/releases/download/v0.0.1/module.zip"
+}
