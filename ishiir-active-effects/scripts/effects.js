@@ -95,8 +95,9 @@ export class IshiirEffectManager {
         this._EFFECTS[effectKey].origin = `Actor.${actorId}`;
         const activeEffect = await this._API.addEffectOnActor(actorId, EFFECT_NAMES[effectKey], this._EFFECTS[effectKey]);
         if(activeEffect) {
+            const effect = game.actors.get(actorId).effects.get(activeEffect._id);
             await game.actors.get(actorId).update({["flags.iae." + effectKey]: activeEffect._id});
-            await this.toggleEffect(effectKey, actorId, !activeEffect.isTemporary);
+            await this.toggleEffect(effectKey, actorId, !effect.isTemporary);
         }
     };
     
@@ -109,7 +110,7 @@ export class IshiirEffectManager {
         const actor = game.actors.get(actorId);
         const effectId = actor.flags.iae[effectKey];
 
-        if(effectId && await this._API.findEffectByIdOnActor(actorId, effectId)) {
+        if(effectId && await game.actors.get(actorId).effects.get(effectId)) {
             await actor.update({["flags.iae." + effectKey]: ""});
             await this._API.removeEffectFromIdOnActor(actorId, effectId);
         }
@@ -125,7 +126,7 @@ export class IshiirEffectManager {
         const actor = game.actors.get(actorId);
         const effectId = actor.flags.iae[effectKey];
         if (effectId) {
-            const effect = await this._API.findEffectByIdOnActor(actorId, effectId);
+            const effect = game.actors.get(actorId).effects.get(effectId);
             if(effect) {
                 await effect.update({disabled: !enable});
             }

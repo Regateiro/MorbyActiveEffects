@@ -34,7 +34,7 @@ Hooks.once("ready", () => {
  * Ensure flags on actor creation.
  */
 Hooks.on("createActor", (actor) => {
-    if(actor.isOwner) {
+    if(actor?.isOwner) {
         IAESettings.manager.ensureFlags([actor]).then(() => {
             console.info(`ishiir-active-effects | Finished creating flags for actor ${actor._id}.`);
         });
@@ -45,7 +45,7 @@ Hooks.on("createActor", (actor) => {
  * Allow dynamic bonuses to be applies to initiative
  */
 Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
-    if(actor.isOwner) {
+    if(actor?.isOwner) {
         if(actor.system?.attributes?.init?.dynamicBonus) {
             roll._formula += (" + " + actor.system.attributes.init.dynamicBonus);
         }
