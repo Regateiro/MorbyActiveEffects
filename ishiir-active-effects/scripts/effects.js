@@ -6,6 +6,7 @@ export const EFFECTS = {
     blessed: "blessed",
     giants_might: "giants_might",
     greater_rage: "greater_rage",
+    guidance: "guidance",
     next_combat_initiative_bonus: "next_combat_initiative_bonus",
 };
 
@@ -17,6 +18,7 @@ export const EFFECT_NAMES = {
     blessed: "Blessed",
     giants_might: "Giant's Might",
     greater_rage: "Greater Rage",
+    guidance: "Guidance",
     next_combat_initiative_bonus: "Next Combat Initiative Bonus",
 };
 
@@ -64,6 +66,9 @@ export class IshiirEffectManager {
         // Greater Rage
         await this.#createEffect(EFFECTS.greater_rage, "icons/creatures/abilities/mouth-teeth-human.webp");
         await this.#addChange(EFFECTS.greater_rage, "flags.dnd5e.greaterRage", true, EFFECT_MODE.OVERRIDE);
+        // Guidance
+        await this.#createEffect(EFFECTS.guidance, "icons/svg/stone-path.svg", 60);
+        await this.#addChange(EFFECTS.guidance, "system.bonuses.abilities.check", "1d4", EFFECT_MODE.ADD);
         // Next Combat Initiative Bonus
         await this.#createEffect(EFFECTS.next_combat_initiative_bonus, "icons/skills/movement/arrows-up-trio-red.webp");
         await this.#addChange(EFFECTS.next_combat_initiative_bonus, "system.attributes.init.dynamicBonus", "1d8", EFFECT_MODE.ADD);
