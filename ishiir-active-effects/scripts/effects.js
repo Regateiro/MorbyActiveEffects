@@ -71,18 +71,14 @@ export class IshiirEffectManager {
 
     async #createEffect(effectKey, icon, seconds) {
         this._EFFECTS[effectKey] = await this._API.buildDefault(null, EFFECT_NAMES[effectKey], icon);
-        await this.#setDuration(effectKey, seconds);
-    };
-
-    async #addChange(effectKey, key, value, mode) {
-        this._EFFECTS[effectKey].changes.push({key: key, value: value, mode: mode});
-    };
-
-    async #setDuration(effectKey, seconds) {
         this._EFFECTS[effectKey].isTemporary = Boolean(seconds);
         this._EFFECTS[effectKey].seconds = seconds;
         this._EFFECTS[effectKey].turns = null;
         this._EFFECTS[effectKey].rounds = null;
+    };
+
+    async #addChange(effectKey, key, value, mode) {
+        this._EFFECTS[effectKey].changes.push({key: key, value: value, mode: mode});
     };
     
     /**
