@@ -91,9 +91,11 @@ export class IshiirEffectManager {
      * @param {String} actorId The id of the actor to register the effect on.
      */
     async registerEffect(effectKey, actorId) {
+        this._EFFECTS[effectKey].origin = `Actor.${actorId}`;
         const activeEffect = await this._API.addEffectOnActor(actorId, EFFECT_NAMES[effectKey], this._EFFECTS[effectKey]);
         if(activeEffect) {
             await game.actors.get(actorId).update({["flags.iae." + effectKey]: activeEffect._id});
+            await this.toggleEffect(effectKey, actorId, !activeEffect.isTemporary);
         }
     };
     
