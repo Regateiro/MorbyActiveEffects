@@ -6,7 +6,7 @@ export const EFFECTS = {
     blessed: "blessed",
     giants_might: "giants_might",
     greater_rage: "greater_rage",
-    travel_initiative_bonus: "travel_initiative_bonus",
+    next_combat_initiative_bonus: "next_combat_initiative_bonus",
 };
 
 /**
@@ -17,7 +17,7 @@ export const EFFECT_NAMES = {
     blessed: "Blessed",
     giants_might: "Giant's Might",
     greater_rage: "Greater Rage",
-    travel_initiative_bonus: "Travel Initiative Bonus",
+    next_combat_initiative_bonus: "Next Combat Initiative Bonus",
 };
 
 /**
@@ -64,9 +64,9 @@ export class IshiirEffectManager {
         // Greater Rage
         await this.#createEffect(EFFECTS.greater_rage, "icons/creatures/abilities/mouth-teeth-human.webp");
         await this.#addChange(EFFECTS.greater_rage, "flags.dnd5e.greaterRage", true, EFFECT_MODE.OVERRIDE);
-        // Travel Initiative Bonus
-        await this.#createEffect(EFFECTS.travel_initiative_bonus, "icons/skills/movement/arrows-up-trio-red.webp");
-        await this.#addChange(EFFECTS.travel_initiative_bonus, "system.attributes.init.dynamicBonus", "1d8", EFFECT_MODE.ADD);
+        // Next Combat Initiative Bonus
+        await this.#createEffect(EFFECTS.next_combat_initiative_bonus, "icons/skills/movement/arrows-up-trio-red.webp");
+        await this.#addChange(EFFECTS.next_combat_initiative_bonus, "system.attributes.init.dynamicBonus", "1d8", EFFECT_MODE.ADD);
     };
 
     async #createEffect(effectKey, icon, seconds) {
@@ -116,15 +116,15 @@ export class IshiirEffectManager {
      * Disables an effect from an actor.
      * @param {String} effectKey The key name of the effect to disable.
      * @param {String} actorId The id of the actor to disable the effect on.
-     * @param {Boolean} enabled Whether to enable or disable the effect
+     * @param {Boolean} enable Whether to enable or disable the effect
      */
-    async toggleEffect(effectKey, actorId, enabled) {
+    async toggleEffect(effectKey, actorId, enable) {
         const actor = game.actors.get(actorId);
         const effectId = actor.flags.iae[effectKey];
         if (effectId) {
             const effect = await this._API.findEffectByIdOnActor(actorId, effectId);
             if(effect) {
-                await effect.update({"disable": enabled});
+                await effect.update({disabled: !enable});
             }
         }
     };

@@ -49,8 +49,8 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
         if(actor.system?.attributes?.init?.dynamicBonus) {
             roll._formula += (" + " + actor.system.attributes.init.dynamicBonus);
         }
-        // Ensure the travel initiative bonus is disabled after rolling
-        IAESettings.manager.disableEffect(EFFECTS.travel_initiative_bonus);
+        // Ensure that the next combat temporary initiative bonus is disabled after rolling
+        IAESettings.manager.toggleEffect(EFFECTS.next_combat_initiative_bonus, actor._id, false);
     }
 });
 
