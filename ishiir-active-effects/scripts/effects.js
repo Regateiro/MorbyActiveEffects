@@ -1,10 +1,23 @@
 /**
- * Supported Effects
+ * Supported Effect Keys
  */
 export const EFFECTS = {
+    blade_mastery: "blade_mastery",
+    blessed: "blessed",
+    giants_might: "giants_might",
+    greater_rage: "greater_rage",
+    travel_initiative_bonus: "travel_initiative_bonus",
+};
+
+/**
+ * Supported Effect Names
+ */
+export const EFFECT_NAMES = {
     blade_mastery: "Blade Mastery",
+    blessed: "Blessed",
     giants_might: "Giant's Might",
-    greater_rage: "Greater Rage"
+    greater_rage: "Greater Rage",
+    travel_initiative_bonus: "Travel Initiative Bonus",
 };
 
 /**
@@ -39,6 +52,10 @@ export class IshiirEffectManager {
         await this.#createEffect(EFFECTS.blade_mastery, "icons/skills/melee/strike-sword-steel-yellow.webp");
         await this.#addChange(EFFECTS.blade_mastery, "system.attributes.ac.bonus", 1, EFFECT_MODE.ADD);
         await this.#addChange(EFFECTS.blade_mastery, "flags.dnd5e.bladeMastery", true, EFFECT_MODE.OVERRIDE);
+        // Blessed
+        await this.#createEffect(EFFECTS.blessed, "icons/svg/angel.svg", 60);
+        await this.#addChange(EFFECTS.blessed, "system.bonuses.All-Attacks", "1d4", EFFECT_MODE.ADD);
+        await this.#addChange(EFFECTS.blessed, "system.bonuses.abilities.save", "1d4", EFFECT_MODE.ADD);
         // Giant's Might
         await this.#createEffect(EFFECTS.giants_might, "icons/skills/social/intimidation-impressing.webp", 60);
         await this.#addChange(EFFECTS.giants_might, "system.traits.size", "lg", EFFECT_MODE.OVERRIDE);
@@ -47,59 +64,93 @@ export class IshiirEffectManager {
         // Greater Rage
         await this.#createEffect(EFFECTS.greater_rage, "icons/creatures/abilities/mouth-teeth-human.webp");
         await this.#addChange(EFFECTS.greater_rage, "flags.dnd5e.greaterRage", true, EFFECT_MODE.OVERRIDE);
-    }
-
-    async #createEffect(effectName, icon, seconds) {
-        this._EFFECTS[effectName] = await this._API.buildDefault(null, effectName, icon);
-        await this.#setDuration(effectName, seconds);
+        // Travel Initiative Bonus
+        await this.#createEffect(EFFECTS.travel_initiative_bonus, "icons/skills/movement/arrows-up-trio-red.webp");
+        await this.#addChange(EFFECTS.travel_initiative_bonus, "system.attributes.init.dynamicBonus", "1d8", EFFECT_MODE.ADD);
     };
 
-    async #addChange(effectName, key, value, mode) {
-        this._EFFECTS[effectName].changes.push({key: key, value: value, mode: mode});
+    async #createEffect(effectKey, icon, seconds) {
+        this._EFFECTS[effectKey] = await this._API.buildDefault(null, EFFECT_NAMES[effectKey], icon);
+        await this.#setDuration(effectKey, seconds);
     };
 
-    async #setDuration(effectName, seconds) {
-        this._EFFECTS[effectName].isTemporary = Boolean(seconds);
-        this._EFFECTS[effectName].seconds = seconds;
-        this._EFFECTS[effectName].turns = null;
-        this._EFFECTS[effectName].rounds = null;
+    async #addChange(effectKey, key, value, mode) {
+        this._EFFECTS[effectKey].changes.push({key: key, value: value, mode: mode});
+    };
+
+    async #setDuration(effectKey, seconds) {
+        this._EFFECTS[effectKey].isTemporary = Boolean(seconds);
+        this._EFFECTS[effectKey].seconds = seconds;
+        this._EFFECTS[effectKey].turns = null;
+        this._EFFECTS[effectKey].rounds = null;
     };
     
-    async registerEffect(effectName, actorId) {
-        const activeEffect = await this._API.addEffectOnActor(actorId, effectName, this._EFFECTS[effectName]);
+    /**
+     * Register an effect on an actor.
+     * @param {String} effectKey The key name of the effect to unregister.
+     * @param {String} actorId The id of the actor to register the effect on.
+     */
+    async registerEffect(effectKey, actorId) {
+        const activeEffect = await this._API.addEffectOnActor(actorId, EFFECT_NAMES[effectKey], this._EFFECTS[effectKey]);
         if(activeEffect) {
-            const key = Object.keys(EFFECTS).find(key => EFFECTS[key] === effectName);
-            await game.actors.get(actorId).update({["flags.iae." + key]: activeEffect._id});
+            await game.actors.get(actorId).update({["flags.iae." + effectKey]: activeEffect._id});
         }
-    }
+    };
     
     /**
      * Unregister an effect from an actor.
-     * @param {*} effectId The id of the effect to unregister.
-     * @param {*} actorId The id of the actor to unregister the effect from.
+     * @param {String} effectKey The key name of the effect to unregister.
+     * @param {String} actorId The id of the actor to unregister the effect from.
      */
-    async unregisterEffect(effectId, actorId) {
-        if(await this._API.findEffectByIdOnActor(actorId, effectId)) {
-            const actor = game.actors.get(actorId);
-            const key = Object.keys(actor.flags.iae).find(key => actor.flags.iae[key] === effectId);
-            await actor.update({["flags.iae." + key]: null});
+    async unregisterEffect(effectKey, actorId) {
+        const actor = game.actors.get(actorId);
+        const effectId = actor.flags.iae[effectKey];
+
+        if(effectId && await this._API.findEffectByIdOnActor(actorId, effectId)) {
+            await actor.update({["flags.iae." + effectKey]: ""});
             await this._API.removeEffectFromIdOnActor(actorId, effectId);
         }
-    }
+    };
+    
+    /**
+     * Disables an effect from an actor.
+     * @param {String} effectKey The key name of the effect to disable.
+     * @param {String} actorId The id of the actor to disable the effect on.
+     * @param {Boolean} enabled Whether to enable or disable the effect
+     */
+    async toggleEffect(effectKey, actorId, enabled) {
+        const actor = game.actors.get(actorId);
+        const effectId = actor.flags.iae[effectKey];
+        if (effectId) {
+            const effect = await this._API.findEffectByIdOnActor(actorId, effectId);
+            if(effect) {
+                await effect.update({"disable": enabled});
+            }
+        }
+    };
 
     /**
-     * Ensure flags exist for all actors owned by the user.
+     * Checks if an effect related to the effect key is applied on the actor.
+     * @param {String} effectKey The key name of the effect to disable.
+     * @param {String} actorId The id of the actor to disable the effect on.
+     */
+    isApplied(effectKey, actorId) {
+        return Boolean(game.actors.get(actorId)?.flags?.iae[effectKey]);
+    };
+
+    /**
+     * Ensure effect flags exist for all actors owned by the user.
      * @param {*} actors Optional list of actors to ensure flags on.
      */
     async ensureFlags(actors = game.actors) {
-        const flags = {};
         const futures = [];
 
         // Update owned actors so they have flags defined
         actors.filter((actor) => actor.isOwner).forEach((actor) => {
+            const flags = {};
             for (const effect of Object.keys(EFFECTS)) {
                 if(!actor.flags?.iae || !actor.flags?.iae[effect]) {
-                    flags["flags.iae." + effect] = null;
+                    flags["flags.iae." + effect] = "";
                 }
             }
             futures.push(actor.update(flags));
@@ -109,5 +160,5 @@ export class IshiirEffectManager {
         for(const future of futures) {
             await future;
         }
-    }
-}
+    };
+};

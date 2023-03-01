@@ -1,4 +1,4 @@
-import { IshiirEffectManager, EFFECTS } from "./effects.js";
+import { IshiirEffectManager, EFFECT_NAMES } from "./effects.js";
 
 /**
  * Retrieves the value of a setting related to IAE.
@@ -39,10 +39,10 @@ class Settings {
         });
 
         // Register a checkbox for all supported effects
-        for (const effect of Object.keys(EFFECTS)) {
-            game.settings.register("ishiir-active-effects", effect, {
-                name: "Effect: " + EFFECTS[effect],
-                hint: "Add the " + EFFECTS[effect] + " effect.",
+        for (const effectKey of Object.keys(EFFECT_NAMES)) {
+            game.settings.register("ishiir-active-effects", effectKey, {
+                name: EFFECT_NAMES[effectKey],
+                hint: "Add the " + EFFECT_NAMES[effectKey] + " effect.",
                 scope: "client",
                 config: true,
                 default: false,
@@ -63,19 +63,18 @@ class Settings {
      */
     refreshConfigEffects() {
         // For each effect
-        for (const effect of Object.keys(EFFECTS)) {
+        for (const effectKey of Object.keys(EFFECT_NAMES)) {
             const actorId = getIAESetting("selectedActor");
-            const state = getIAESetting(effect);
-            const effectId = game.actors.get(actorId)?.flags?.iae[effect];
+            const shouldApply = getIAESetting(effectKey);
 
             // If the effect needs to be applied/removed from the actor
-            if(Boolean(effectId) !== state) {
-                if(state) {
-                    // Apply the effect if it is wanted
-                    this.manager.registerEffect(EFFECTS[effect], actorId).then();
+            if(this.manager.isApplied(effectKey, actorId) !== shouldApply) {
+                if(shouldApply) {
+                    // Apply the effect if it should be applied
+                    this.manager.registerEffect(effectKey, actorId).then();
                 } else {
-                    // Remove the effect if it is not wanted
-                    this.manager.unregisterEffect(effectId, actorId).then();
+                    // Remove the effect if it should not be applied
+                    this.manager.unregisterEffect(effectKey, actorId).then();
                 }
             }
         }

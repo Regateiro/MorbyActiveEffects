@@ -46,6 +46,24 @@
                     "minimum": "0.5.1",
                     "verified": "0.5.1"
                 }
+            },
+            {
+                "id": "dae",
+                "type": "module",
+                "manifest": "https://gitlab.com/tposney/dae/raw/master/package/module.json",
+                "compatibility": {
+                    "minimum": "0.10.32",
+                    "verified": "0.10.32"
+                }
+            },
+            {
+                "id": "lib-wrapper",
+                "type": "module",
+                "manifest": "https://github.com/ruipin/fvtt-lib-wrapper/releases/latest/download/module.json",
+                "compatibility": {
+                    "minimum": "1.12.11.0",
+                    "verified": "1.12.12.0"
+                }
             }
         ]
     },
