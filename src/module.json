@@ -1,0 +1,45 @@
+{
+    "id": "morby-active-effects",
+    "title": "Morby Active Effects",
+    "description": "This module provides a collection of convient active effects to automate some simple effects.",
+    "authors": [
+        {
+            "name": "regateiro",
+            "email": "diogo.regateiro@gmail.com",
+            "url": "https://github.com/Regateiro"
+        }
+    ],
+    "url": "https://github.com/Regateiro/MorbyActiveEffects/tree/master/morby-active-effects",
+    "version": "0.0.1",
+    "compatibility": {
+        "minimum": "10.291",
+        "verified": "10"
+    },
+    "esmodules": [
+        "./morby-active-effects.js"
+    ],
+    "relationships": {
+        "systems": [
+            {
+                "id": "dnd5e",
+                "compatibility": {
+                    "minimum": "2.1.1",
+                    "verified": "2.1.5"
+                }
+            }
+        ],
+        "requires": [
+            {
+                "id": "active-effect-manager-lib",
+                "type": "module",
+                "manifest": "https://github.com/p4535992/foundryvtt-active-effect-manager-lib/releases/latest/download/module.json",
+                "compatibility": {
+                    "minimum": "0.1.24",
+                    "verified": "0.1.24"
+                }
+            }
+        ]
+    },
+    "manifest": "https://github.com/Regateiro/IshiirActiveEffects/releases/download/v0.0.1/module.json",
+    "download": "https://github.com/Regateiro/IshiirActiveEffects/releases/download/v0.0.1/module.zip"
+}
