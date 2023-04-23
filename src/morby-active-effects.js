@@ -1,18 +1,27 @@
-import { applyHeroismTempHP } from "./effects.js";
-import { isActualOwner, noAction, promptUser } from "./utils.js";
+import { cm_register } from "./chat-commands.js";
+import { handleTurnStartEffects } from "./effects.js";
 
-let eAPI = null;
+export let effectsAPI = null;
+export let controlledToken = null;
 
 /**
  * One time registration steps for settings and core function overrides.
  */
 Hooks.once("ready", () => {
-    eAPI = game.modules.get("active-effect-manager-lib").api;
+    effectsAPI = game.modules.get("active-effect-manager-lib").api;
     // Ensure flags on existing characters
     game.actors.filter((actor) => actor.isOwner)
         .filter((actor) => !actor.flags?.mae)
         .forEach((actor) => actor.update({"flags.mae": {}}));
 });
+
+/**
+ * Register chat commands
+ */
+Hooks.on("chatCommandsReady", commands => {
+    cm_register(commands);
+});
+
 
 /**
  * Ensure flags on actor creation.
@@ -39,11 +48,13 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
 /**
  * Apply spell effects at the start of the turn
  */
-Hooks.on("updateCombat", (combat, turn, diff, _) => {
-    const actor = game.actors.get(combat.combatant?.actorId);
-    if(isActualOwner(actor)) {
-        if(actor.flags?.mae?.heroismTempHP) {
-            promptUser("Effect: Heroism", "Apply Heroism effect to restore temporary HP?", function() { applyHeroismTempHP(actor) }, noAction);
-        }
-    }
+Hooks.on("updateCombat", (combat, turn, diff, userId) => {
+    handleTurnStartEffects(combat);
+});
+
+/**
+ * Keep track of which token is being controlled
+ */
+Hooks.on("controlToken", (token, controlled) => {
+    controlledToken = controlled ? token : null;
 });
