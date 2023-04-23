@@ -15,7 +15,7 @@ export function cm_register(commands) {
         name: "/mae",
         module: "morby-active-effects",
         description: "Apply active effects to selected tokens",
-        icon: "<i class='fas fa-dice-d20'></i>",
+        icon: "<i class='fas fa-hand-holding-magic'></i>",
         requiredRole: "NONE",
         callback: handleCommand,
         autocompleteCallback: handleAutoComplete,
