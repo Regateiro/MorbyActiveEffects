@@ -3,7 +3,6 @@ import { controlledTokens, effectsAPI } from "./morby-active-effects.js";
 
 const EFFECTS = {
     "bless": { name: "Bless", icon: "icons/svg/angel.svg", commands: "bless" },
-    "gift": { name: "Guidance", icon: "icons/svg/stone-path.svg", commands: "guidance" },
     "giftofalacrity": { name: "Gift of Alacrity", icon: "icons/skills/movement/figure-running-gray.webp", commands: "giftofalacrity | goa" },
     "guidance": { name: "Guidance", icon: "icons/svg/stone-path.svg", commands: "guidance" },
     "heroism": { name: "Heroism", icon: "icons/magic/life/heart-cross-strong-blue.webp", commands: "heroism" },
