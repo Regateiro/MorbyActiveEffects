@@ -1,17 +1,24 @@
 import { EFFECT_MODE } from "./effects.js";
 import { controlledToken, effectsAPI } from "./morby-active-effects.js";
 
+const SUPPORTED_EFFECTS = [
+    "lacerated",
+    "heroism",
+    "initiativeBonus"
+]
+
 export function cm_register(commands) {
     commands.register({
         name: "/mae",
         module: "morby-active-effects",
-        description: "/mae &lt;condition&gt; &lt;value&gt;",
+        description: "Apply active effects to selected tokens",
         icon: "<i class='fas fa-dice-d20'></i>",
         requiredRole: "NONE",
         callback: handleCommand,
+        autocompleteCallback: handleAutoComplete,
         closeOnComplete: true
     });
-}
+};
 
 async function handleCommand(chat, parameters, messageData) {
     parameters = parameters.toLowerCase().split(" ");
@@ -45,4 +52,18 @@ async function handleCommand(chat, parameters, messageData) {
             break;
     }
     return {};
-}
+};
+
+function handleAutoComplete(menu, alias, parameters) {
+    parameters = parameters.toLowerCase().split(" ");
+    let entries = [];
+    if(parameters.length == 1) {
+        SUPPORTED_EFFECTS.filter(effect => effect.startsWith(parameters[0])).forEach(effect => {
+            entries.push(game.chatCommands.createInfoElement(effect));
+        });
+    } else if(parameters.length == 2) {
+        entries.push(game.chatCommands.createInfoElement("Value to apply when triggered (e.g. 5, 1d4, etc.)"));
+    }
+    entries.length = Math.min(entries.length, menu.maxEntries);
+    return entries;
+};
