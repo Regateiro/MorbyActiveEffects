@@ -1,5 +1,5 @@
 import { EFFECT_MODE } from "./effects.js";
-import { controlledTokens, effectsAPI } from "./morby-active-effects.js";
+import { targettedTokens, effectsAPI } from "./morby-active-effects.js";
 
 /**
  * Internal effect information
@@ -115,7 +115,7 @@ async function handleCommand(chat, parameters, messageData) {
         // Determine if the effect has a default value or not, and if not, assert that one is provided
         if (Boolean(effectInfo.default) || Boolean(parameters[1])) {
             // For each token that is selected
-            for (const token of Object.values(controlledTokens)) {
+            for (const token of Object.values(targettedTokens)) {
                 // Remove any effect with the same name
                 await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
                 // Create a new effect
@@ -138,7 +138,7 @@ async function handleCommand(chat, parameters, messageData) {
             // Get the effect information
             const effectInfo = EFFECTS[parameters[1]];
             // For each token that is selected
-            for (const token of Object.values(controlledTokens)) {
+            for (const token of Object.values(targettedTokens)) {
                 // Remove any effect with the same name
                 await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
             }
@@ -166,7 +166,10 @@ function handleAutoComplete(menu, alias, parameters) {
     if(parameters.length == 1) {
         // Add all the effect entries that match the start of the first parameter
         Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[0])).forEach(effect => {
-            entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
+            const entry = game.chatCommands.createInfoElement(EFFECTS[effect].commands);
+            if(!entries.includes(entry)) {
+                entries.push(entry);
+            }
         });
         // If the first parameter is matching the start of the clear command
         if("clear".startsWith(parameters[0])) {
@@ -182,7 +185,10 @@ function handleAutoComplete(menu, alias, parameters) {
             case "clear":
                 // Add all the effect entries that match the start of the second parameter
                 Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[1])).forEach(effect => {
-                    entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
+                    const entry = game.chatCommands.createInfoElement(EFFECTS[effect].commands);
+                    if(!entries.includes(entry)) {
+                        entries.push(entry);
+                    }
                 });
                 break;
             default:

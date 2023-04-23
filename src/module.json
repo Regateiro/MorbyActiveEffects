@@ -10,7 +10,7 @@
         }
     ],
     "url": "https://github.com/Regateiro/MorbyActiveEffects/tree/master",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "compatibility": {
         "minimum": "10.291",
         "verified": "10"
@@ -45,6 +45,15 @@
                 "compatibility": {
                     "minimum": "2.0.1",
                     "verified": "2.0.1"
+                }
+            },
+            {
+                "id": "smarttarget",
+                "type": "module",
+                "manifest": "https://github.com/theripper93/Smart-Target/releases/download/0.9.8/module.json",
+                "compatibility": {
+                    "minimum": "0.9.8",
+                    "verified": "0.9.8"
                 }
             }
         ]
