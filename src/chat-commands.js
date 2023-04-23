@@ -1,5 +1,5 @@
 import { EFFECT_MODE } from "./effects.js";
-import { controlledToken, effectsAPI } from "./morby-active-effects.js";
+import { controlledTokens, effectsAPI } from "./morby-active-effects.js";
 
 const SUPPORTED_EFFECTS = [
     "lacerated",
@@ -30,7 +30,9 @@ async function handleCommand(chat, parameters, messageData) {
             lacerated.turns = null;
             lacerated.rounds = null;
             lacerated.changes.push({key: "flags.mae.lacerated", value: parameters[1], mode: EFFECT_MODE.ADD});
-            await effectsAPI.addEffectOnToken(controlledToken.id, "Lacerated", lacerated);
+            for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.addEffectOnToken(token.id, "Lacerated", lacerated);
+            }
             break;
         case "heroism":
             const heroism = await effectsAPI.buildDefault(null, "Heroism", "icons/magic/life/heart-cross-strong-blue.webp");
@@ -39,7 +41,9 @@ async function handleCommand(chat, parameters, messageData) {
             heroism.turns = null;
             heroism.rounds = null;
             heroism.changes.push({key: "flags.mae.heroismTempHP", value: parameters[1], mode: EFFECT_MODE.ADD});
-            await effectsAPI.addEffectOnToken(controlledToken.id, "Heroism", heroism);
+            for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.addEffectOnToken(token.id, "Heroism", heroism);
+            }
             break;
         case "initiativeBonus":
             const initiativeBonus = await effectsAPI.buildDefault(null, "Initiative Bonus", "icons/skills/movement/arrows-up-trio-red.webp");
@@ -48,7 +52,9 @@ async function handleCommand(chat, parameters, messageData) {
             initiativeBonus.turns = null;
             initiativeBonus.rounds = null;
             initiativeBonus.changes.push({key: "flags.mae.initBonus", value: parameters[1], mode: EFFECT_MODE.ADD});
-            await effectsAPI.addEffectOnToken(controlledToken.id, "Initiative Bonus", initiativeBonus);
+            for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.addEffectOnToken(token.id, "Initiative Bonus", initiativeBonus);
+            }
             break;
     }
     return {};

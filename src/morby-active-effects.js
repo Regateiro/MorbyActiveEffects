@@ -2,7 +2,7 @@ import { cm_register } from "./chat-commands.js";
 import { handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
-export let controlledToken = null;
+export const controlledTokens = {};
 
 /**
  * One time registration steps for settings and core function overrides.
@@ -56,5 +56,9 @@ Hooks.on("updateCombat", (combat, turn, diff, userId) => {
  * Keep track of which token is being controlled
  */
 Hooks.on("controlToken", (token, controlled) => {
-    controlledToken = controlled ? token : null;
+    if(controlled) {
+        controlledTokens[token.id] = token;
+    } else {
+        delete controlledTokens[token.id];
+    }
 });
