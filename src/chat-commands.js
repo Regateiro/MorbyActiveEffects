@@ -16,7 +16,7 @@ const _EFFECT_INFO = {
         default: "1d4",
         seconds: 60,
         help: "Bonus to be applied by bless. Defaults to 1d4.",
-        toChatMessage: function (value) { return _toChatMessage("blessed", "to attacks and saves", "1d4", value); }
+        toChatMessage: function (value) { return _toChatMessage("bless", "blessed", "to attacks and saves", "1d4", value); }
     },
     "giftofalacrity": {
         name: "Gift of Alacrity",
@@ -26,7 +26,7 @@ const _EFFECT_INFO = {
         default: "1d8",
         seconds: 60*60*8,
         help: "Bonus to be applied to initiative. Defaults to 1d8.",
-        toChatMessage: function (value) { return _toChatMessage("gifted with alacrity", "to initiative", "1d8", value); }
+        toChatMessage: function (value) { return _toChatMessage("giftofalacrity", "gifted with alacrity", "to initiative", "1d8", value); }
     },
     "guidance": {
         name: "Guidance",
@@ -36,7 +36,7 @@ const _EFFECT_INFO = {
         default: "1d4",
         seconds: 60,
         help: "Bonus to be applied by guidance. Defaults to 1d4.",
-        toChatMessage: function (value) { return _toChatMessage("guided", "to skill checks", "1d4", value); }
+        toChatMessage: function (value) { return _toChatMessage("guidance", "guided", "to skill checks", "1d4", value); }
     },
     "heroism": {
         name: "Heroism",
@@ -46,7 +46,7 @@ const _EFFECT_INFO = {
         default: null,
         seconds: 60,
         help: "Temporary HP to apply at the start of turn.",
-        toChatMessage: function (value) { return _toChatMessage("imbued with bravery", "temporary HP every turn", null, value); }
+        toChatMessage: function (value) { return _toChatMessage("heroism", "imbued with bravery", "temporary HP every turn", null, value); }
     },
     "initiativebonus": {
         name: "Initiative Bonus",
@@ -56,7 +56,7 @@ const _EFFECT_INFO = {
         default: "1d8",
         seconds: 60*60*8,
         help: "Bonus to be applied to initiative. Defaults to 1d8.",
-        toChatMessage: function (value) { return _toChatMessage("more alert", "to initiative", "1d8", value); }
+        toChatMessage: function (value) { return _toChatMessage("initiativebonus", "more alert", "to initiative", "1d8", value); }
     },
     "lacerated": {
         name: "Lacerated",
@@ -66,7 +66,7 @@ const _EFFECT_INFO = {
         default: null,
         seconds: 60,
         help: "Damage to apply at the start of turn.",
-        toChatMessage: function (value) { return _toChatMessage("lacerated", "damage every turn", null, value); }
+        toChatMessage: function (value) { return _toChatMessage("lacerated", "lacerated", "damage every turn", null, value); }
     }
 };
 
@@ -78,13 +78,22 @@ const _EFFECT_INFO = {
  * @param {*} value 
  * @returns 
  */
-function _toChatMessage(effectVerb, effectDesc, defaultValue, value) {
+function _toChatMessage(effectId, effectVerb, effectDesc, defaultValue, value) {
+    // Join the token names and select the target verb
     let targets = Object.values(targettedTokens).map(t => t.name).join(", ");
-    var pos = targets.lastIndexOf(',');
-    targets = targets.substring(0, pos) + " and " + targets.substring(pos + 1);
-    const targetVerb = Object.keys(targettedTokens).length > 1 ? "are" : "is";
+    let targetVerb = "is";
+    // Fix the last comma into an 'and' if there are more than 1 token and update the verb
+    if(Object.values(targettedTokens).length > 1) {
+        var pos = targets.lastIndexOf(',');
+        targets = targets.substring(0, pos) + " and " + targets.substring(pos + 1);
+        targetVerb = "are";
+    }
+    // Use the default value if the other value is not given
     value = value || defaultValue;
-    return `${targets} ${targetVerb} now ${effectVerb} with ${value} ${effectDesc}.`
+    // Define the apply button for other users
+    const button = `<button class='morby-active-effects' data-effect-id=${effectId} data-effect-value=${value}><i class="fas fa-hand-holding-magic"></i>Apply Effect</button>`;
+    // return the code
+    return `${targets} ${targetVerb} now ${effectVerb} with ${value} ${effectDesc}. ${button}`;
 }
 
 /**
@@ -138,21 +147,7 @@ async function handleCommand(chat, parameters, messageData) {
         // Determine if the effect has a default value or not, and if not, assert that one is provided
         if (Boolean(effectInfo.default) || Boolean(parameters[1])) {
             // For each token that is selected
-            for (const token of Object.values(targettedTokens)) {
-                // Remove any effect with the same name
-                await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
-                // Create a new effect
-                const effect = await effectsAPI.buildDefault(null, effectInfo.name, effectInfo.icon);
-                effect.isTemporary = true;
-                effect.seconds = effectInfo.seconds;
-                effect.turns = null;
-                effect.rounds = null;
-                for (const change of effectInfo.changes) {
-                    effect.changes.push({key: change, value: parameters[1] || effectInfo.default, mode: EFFECT_MODE.ADD});
-                }
-                // Add the effect to the token
-                await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
-            }
+            await applyEffectToAllTargets(parameters[0], parameters[1]);
             ChatLog.prototype.processMessage(effectInfo.toChatMessage(parameters[1]));
         }
     // If the first parameter is a clear command
@@ -171,6 +166,25 @@ async function handleCommand(chat, parameters, messageData) {
 
     return {};
 };
+
+export async function applyEffectToAllTargets(effectId, value) {
+    const effectInfo = EFFECTS[effectId];
+    for (const token of Object.values(targettedTokens)) {
+        // Remove any effect with the same name
+        await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
+        // Create a new effect
+        const effect = await effectsAPI.buildDefault(null, effectInfo.name, effectInfo.icon);
+        effect.isTemporary = true;
+        effect.seconds = effectInfo.seconds;
+        effect.turns = null;
+        effect.rounds = null;
+        for (const change of effectInfo.changes) {
+            effect.changes.push({key: change, value: value || effectInfo.default, mode: EFFECT_MODE.ADD});
+        }
+        // Add the effect to the token
+        await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
+    }
+}
 
 /**
  * Handle requests for chat autocomplete

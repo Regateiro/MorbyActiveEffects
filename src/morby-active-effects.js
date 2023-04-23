@@ -1,4 +1,4 @@
-import { cm_register } from "./chat-commands.js";
+import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
 import { handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
@@ -13,6 +13,10 @@ Hooks.once("ready", () => {
     game.actors.filter((actor) => actor.isOwner)
         .filter((actor) => !actor.flags?.mae)
         .forEach((actor) => actor.update({"flags.mae": {}}));
+    // Bind apply effect buttons to the callback
+    $(document).on('click', '.morby-active-effects', function () { 
+        applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value')); 
+    });
 });
 
 /**
