@@ -30,73 +30,80 @@ async function handleCommand(chat, parameters, messageData) {
         case "lace":
         case "lacerated":
             if(!Boolean(parameters[1])) break; // Require a value
-            const lacerated = await effectsAPI.buildDefault(null, EFFECTS["lacerated"].name, EFFECTS["lacerated"].icon);
-            lacerated.isTemporary = true;
-            lacerated.seconds = 60;
-            lacerated.turns = null;
-            lacerated.rounds = null;
-            lacerated.changes.push({key: "flags.mae.lacerated", value: parameters[1], mode: EFFECT_MODE.ADD});
             for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["lacerated"].name);
+                const lacerated = await effectsAPI.buildDefault(null, EFFECTS["lacerated"].name, EFFECTS["lacerated"].icon);
+                lacerated.isTemporary = true;
+                lacerated.seconds = 60;
+                lacerated.turns = null;
+                lacerated.rounds = null;
+                lacerated.changes.length = 0;
+                lacerated.changes.push({key: "flags.mae.lacerated", value: parameters[1], mode: EFFECT_MODE.ADD});
                 await effectsAPI.addEffectOnToken(token.id, EFFECTS["lacerated"].name, lacerated);
             }
             break;
         case "heroism":
             if(!Boolean(parameters[1])) break; // Require a value
-            const heroism = await effectsAPI.buildDefault(null, EFFECTS["heroism"].name, EFFECTS["heroism"].icon);
-            heroism.isTemporary = true;
-            heroism.seconds = 60;
-            heroism.turns = null;
-            heroism.rounds = null;
-            heroism.changes.push({key: "flags.mae.heroismTempHP", value: parameters[1], mode: EFFECT_MODE.ADD});
             for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["heroism"].name);
+                const heroism = await effectsAPI.buildDefault(null, EFFECTS["heroism"].name, EFFECTS["heroism"].icon);
+                heroism.isTemporary = true;
+                heroism.seconds = 60;
+                heroism.turns = null;
+                heroism.rounds = null;
+                heroism.changes.push({key: "flags.mae.heroismTempHP", value: parameters[1], mode: EFFECT_MODE.ADD});
                 await effectsAPI.addEffectOnToken(token.id, EFFECTS["heroism"].name, heroism);
             }
             break;
         case "ib":
         case "initbonus":
         case "initiativebonus":
-            const initiativeBonus = await effectsAPI.buildDefault(null, EFFECTS["initiativebonus"].name, EFFECTS["initiativebonus"].icon);
-            initiativeBonus.isTemporary = true;
-            initiativeBonus.seconds = 28800;
-            initiativeBonus.turns = null;
-            initiativeBonus.rounds = null;
-            initiativeBonus.changes.push({key: "flags.mae.initBonus", value: parameters[1] || "1d8", mode: EFFECT_MODE.ADD});
             for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["initiativebonus"].name);
+                const initiativeBonus = await effectsAPI.buildDefault(null, EFFECTS["initiativebonus"].name, EFFECTS["initiativebonus"].icon);
+                initiativeBonus.isTemporary = true;
+                initiativeBonus.seconds = 28800;
+                initiativeBonus.turns = null;
+                initiativeBonus.rounds = null;
+                initiativeBonus.changes.push({key: "flags.mae.initBonus", value: parameters[1] || "1d8", mode: EFFECT_MODE.ADD});
                 await effectsAPI.addEffectOnToken(token.id, EFFECTS["initiativebonus"].name, initiativeBonus);
             }
             break;
         case "goa":
         case "giftofalacrity":
-            const giftOfAlacrity = await effectsAPI.buildDefault(null, EFFECTS["giftofalacrity"].name, EFFECTS["giftofalacrity"].icon);
-            giftOfAlacrity.isTemporary = true;
-            giftOfAlacrity.seconds = 28800;
-            giftOfAlacrity.turns = null;
-            giftOfAlacrity.rounds = null;
-            giftOfAlacrity.changes.push({key: "flags.mae.initBonus", value: parameters[1] || "1d8", mode: EFFECT_MODE.ADD});
             for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["giftofalacrity"].name);
+                const giftOfAlacrity = await effectsAPI.buildDefault(null, EFFECTS["giftofalacrity"].name, EFFECTS["giftofalacrity"].icon);
+                giftOfAlacrity.isTemporary = true;
+                giftOfAlacrity.seconds = 28800;
+                giftOfAlacrity.turns = null;
+                giftOfAlacrity.rounds = null;
+                giftOfAlacrity.changes.push({key: "flags.mae.initBonus", value: parameters[1] || "1d8", mode: EFFECT_MODE.ADD});
                 await effectsAPI.addEffectOnToken(token.id, EFFECTS["giftofalacrity"].name, giftOfAlacrity);
             }
             break;
         case "bless":
-            const bless = await effectsAPI.buildDefault(null, EFFECTS["bless"].name, EFFECTS["bless"].icon);
-            bless.isTemporary = true;
-            bless.seconds = 60;
-            bless.turns = null;
-            bless.rounds = null;
-            bless.changes.push({key: "system.bonuses.All-Attacks", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
-            bless.changes.push({key: "system.bonuses.abilities.save", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
             for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["bless"].name);
+                const bless = await effectsAPI.buildDefault(null, EFFECTS["bless"].name, EFFECTS["bless"].icon);
+                bless.isTemporary = true;
+                bless.seconds = 60;
+                bless.turns = null;
+                bless.rounds = null;
+                bless.changes.push({key: "system.bonuses.All-Attacks", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
+                bless.changes.push({key: "system.bonuses.abilities.save", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
                 await effectsAPI.addEffectOnToken(token.id, EFFECTS["bless"].name, bless);
             }
             break;
         case "guidance":
-            const guidance = await effectsAPI.buildDefault(null, EFFECTS["guidance"].name, EFFECTS["guidance"].icon);
-            guidance.isTemporary = true;
-            guidance.seconds = 60;
-            guidance.turns = null;
-            guidance.rounds = null;
-            guidance.changes.push({key: "system.bonuses.abilities.check", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
             for (const token of Object.values(controlledTokens)) {
+                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["guidance"].name);
+                const guidance = await effectsAPI.buildDefault(null, EFFECTS["guidance"].name, EFFECTS["guidance"].icon);
+                guidance.isTemporary = true;
+                guidance.seconds = 60;
+                guidance.turns = null;
+                guidance.rounds = null;
+                guidance.changes.push({key: "system.bonuses.abilities.check", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
                 await effectsAPI.addEffectOnToken(token.id, "Guidance", guidance);
             }
             break;
