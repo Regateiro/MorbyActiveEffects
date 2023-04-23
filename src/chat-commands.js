@@ -108,6 +108,12 @@ async function handleCommand(chat, parameters, messageData) {
     // Split the parameters into separate fields
     parameters = parameters.toLowerCase().split(" ");
 
+    let broadcast = false;
+    if(parameters[0] == "post") {
+        parameters.shift();
+        broadcast = true;
+    }
+
     // If the first parameter corresponds to an effect
     if(Object.keys(EFFECTS).includes(parameters[0])) {
         // Get the effect information
@@ -166,28 +172,32 @@ function handleAutoComplete(menu, alias, parameters) {
     if(parameters.length == 1) {
         // Add all the effect entries that match the start of the first parameter
         Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[0])).forEach(effect => {
-            const entry = game.chatCommands.createInfoElement(EFFECTS[effect].commands);
-            if(!entries.includes(entry)) {
-                entries.push(entry);
+            if(!entries.find((entry) => entry.textContent == EFFECTS[effect].commands)) {
+                entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
             }
         });
+        // Add a separator
+        entries.push(game.chatCommands.createSeparatorElement());
+        // If the first parameter is matching the start of the clear command
+        if("post".startsWith(parameters[0])) {
+            // Add clear as a possible command to the autocompletion
+            entries.push(game.chatCommands.createInfoElement("post - post effect targets to chat"));
+        }
         // If the first parameter is matching the start of the clear command
         if("clear".startsWith(parameters[0])) {
-            // Add a seperator if the entry list is not empty
-            if(entries.length > 0) entries.push(game.chatCommands.createSeparatorElement());
             // Add clear as a possible command to the autocompletion
-            entries.push(game.chatCommands.createInfoElement("clear"));
+            entries.push(game.chatCommands.createInfoElement("clear - remove effect from token"));
         }
     // if the second parameter is being written
     } else if(parameters.length == 2) {
         switch(parameters[0]) {
             // If the first parameter is a clear command
+            case "post":
             case "clear":
                 // Add all the effect entries that match the start of the second parameter
                 Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[1])).forEach(effect => {
-                    const entry = game.chatCommands.createInfoElement(EFFECTS[effect].commands);
-                    if(!entries.includes(entry)) {
-                        entries.push(entry);
+                    if(!entries.find((entry) => entry.textContent == EFFECTS[effect].commands)) {
+                        entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
                     }
                 });
                 break;
@@ -197,6 +207,11 @@ function handleAutoComplete(menu, alias, parameters) {
                     entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[0]].help));
                 }
                 break;
+        }
+    // if the third parameter is being written
+    } else if(parameters.length == 3 && parameters[0] == "post") {
+        if(Object.keys(EFFECTS).includes(parameters[1])) {
+            entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[1]].help));
         }
     }
 
