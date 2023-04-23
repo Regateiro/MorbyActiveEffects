@@ -27,20 +27,20 @@ async function handleCommand(chat, parameters, messageData) {
             break;
         case "heroism":
             const heroism = await effectsAPI.buildDefault(null, "Heroism", "icons/magic/life/heart-cross-strong-blue.webp");
-            lacerated.isTemporary = true;
-            lacerated.seconds = 60;
-            lacerated.turns = null;
-            lacerated.rounds = null;
-            lacerated.changes.push({key: "flags.mae.heroismTempHP", value: parameters[1], mode: EFFECT_MODE.ADD});
+            heroism.isTemporary = true;
+            heroism.seconds = 60;
+            heroism.turns = null;
+            heroism.rounds = null;
+            heroism.changes.push({key: "flags.mae.heroismTempHP", value: parameters[1], mode: EFFECT_MODE.ADD});
             await effectsAPI.addEffectOnToken(controlledToken.id, "Heroism", heroism);
             break;
         case "initiativeBonus":
             const initiativeBonus = await effectsAPI.buildDefault(null, "Initiative Bonus", "icons/skills/movement/arrows-up-trio-red.webp");
-            lacerated.isTemporary = true;
-            lacerated.seconds = 28800;
-            lacerated.turns = null;
-            lacerated.rounds = null;
-            lacerated.changes.push({key: "flags.mae.initBonus", value: parameters[1], mode: EFFECT_MODE.ADD});
+            initiativeBonus.isTemporary = true;
+            initiativeBonus.seconds = 28800;
+            initiativeBonus.turns = null;
+            initiativeBonus.rounds = null;
+            initiativeBonus.changes.push({key: "flags.mae.initBonus", value: parameters[1], mode: EFFECT_MODE.ADD});
             await effectsAPI.addEffectOnToken(controlledToken.id, "Initiative Bonus", initiativeBonus);
             break;
     }
