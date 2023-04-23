@@ -15,7 +15,8 @@ const _EFFECT_INFO = {
         ],
         default: "1d4",
         seconds: 60,
-        help: "Bonus to be applied by bless. Defaults to 1d4."
+        help: "Bonus to be applied by bless. Defaults to 1d4.",
+        toChatMessage: function (value) { return _toChatMessage("blessed", "to attacks and saves", "1d4", value); }
     },
     "giftofalacrity": {
         name: "Gift of Alacrity",
@@ -24,7 +25,8 @@ const _EFFECT_INFO = {
         changes: ["flags.mae.initBonus"],
         default: "1d8",
         seconds: 60*60*8,
-        help: "Bonus to be applied to initiative. Defaults to 1d8."
+        help: "Bonus to be applied to initiative. Defaults to 1d8.",
+        toChatMessage: function (value) { return _toChatMessage("gifted with alacrity", "to initiative", "1d8", value); }
     },
     "guidance": {
         name: "Guidance",
@@ -33,7 +35,8 @@ const _EFFECT_INFO = {
         changes: ["system.bonuses.abilities.check"],
         default: "1d4",
         seconds: 60,
-        help: "Bonus to be applied by guidance. Defaults to 1d4."
+        help: "Bonus to be applied by guidance. Defaults to 1d4.",
+        toChatMessage: function (value) { return _toChatMessage("guided", "to skill checks", "1d4", value); }
     },
     "heroism": {
         name: "Heroism",
@@ -42,7 +45,8 @@ const _EFFECT_INFO = {
         changes: ["flags.mae.heroismTempHP"],
         default: null,
         seconds: 60,
-        help: "Temporary HP to apply at the start of turn."
+        help: "Temporary HP to apply at the start of turn.",
+        toChatMessage: function (value) { return _toChatMessage("imbued with bravery", "temporary HP every turn", null, value); }
     },
     "initiativebonus": {
         name: "Initiative Bonus",
@@ -51,7 +55,8 @@ const _EFFECT_INFO = {
         changes: ["flags.mae.initBonus"],
         default: "1d8",
         seconds: 60*60*8,
-        help: "Bonus to be applied to initiative. Defaults to 1d8."
+        help: "Bonus to be applied to initiative. Defaults to 1d8.",
+        toChatMessage: function (value) { return _toChatMessage("more alert", "to initiative", "1d8", value); }
     },
     "lacerated": {
         name: "Lacerated",
@@ -60,9 +65,27 @@ const _EFFECT_INFO = {
         changes: ["flags.mae.lacerated"],
         default: null,
         seconds: 60,
-        help: "Damage to apply at the start of turn."
+        help: "Damage to apply at the start of turn.",
+        toChatMessage: function (value) { return _toChatMessage("lacerated", "damage every turn", null, value); }
     }
 };
+
+/**
+ * Converts an effect to a chat message upon application.
+ * @param {*} effectVerb 
+ * @param {*} effectDesc 
+ * @param {*} defaultValue 
+ * @param {*} value 
+ * @returns 
+ */
+function _toChatMessage(effectVerb, effectDesc, defaultValue, value) {
+    let targets = Object.values(targettedTokens).map(t => t.name).join(", ");
+    var pos = targets.lastIndexOf(',');
+    targets = targets.substring(0, pos) + " and " + targets.substring(pos + 1);
+    const targetVerb = Object.keys(targettedTokens).length > 1 ? "are" : "is";
+    value = value || defaultValue;
+    return `${targets} ${targetVerb} now ${effectVerb} with ${value} ${effectDesc}.`
+}
 
 /**
  * Effect aliases to information mapping
@@ -108,12 +131,6 @@ async function handleCommand(chat, parameters, messageData) {
     // Split the parameters into separate fields
     parameters = parameters.toLowerCase().split(" ");
 
-    let broadcast = false;
-    if(parameters[0] == "post") {
-        parameters.shift();
-        broadcast = true;
-    }
-
     // If the first parameter corresponds to an effect
     if(Object.keys(EFFECTS).includes(parameters[0])) {
         // Get the effect information
@@ -136,6 +153,7 @@ async function handleCommand(chat, parameters, messageData) {
                 // Add the effect to the token
                 await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
             }
+            ChatLog.prototype.processMessage(effectInfo.toChatMessage(parameters[1]));
         }
     // If the first parameter is a clear command
     } else if (parameters[0] == "clear") {
@@ -176,15 +194,10 @@ function handleAutoComplete(menu, alias, parameters) {
                 entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
             }
         });
-        // Add a separator
-        entries.push(game.chatCommands.createSeparatorElement());
-        // If the first parameter is matching the start of the clear command
-        if("post".startsWith(parameters[0])) {
-            // Add clear as a possible command to the autocompletion
-            entries.push(game.chatCommands.createInfoElement("post - post effect targets to chat"));
-        }
         // If the first parameter is matching the start of the clear command
         if("clear".startsWith(parameters[0])) {
+            // Add a separator
+            if(entries.length > 0) entries.push(game.chatCommands.createSeparatorElement());
             // Add clear as a possible command to the autocompletion
             entries.push(game.chatCommands.createInfoElement("clear - remove effect from token"));
         }
@@ -192,7 +205,6 @@ function handleAutoComplete(menu, alias, parameters) {
     } else if(parameters.length == 2) {
         switch(parameters[0]) {
             // If the first parameter is a clear command
-            case "post":
             case "clear":
                 // Add all the effect entries that match the start of the second parameter
                 Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[1])).forEach(effect => {
@@ -207,11 +219,6 @@ function handleAutoComplete(menu, alias, parameters) {
                     entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[0]].help));
                 }
                 break;
-        }
-    // if the third parameter is being written
-    } else if(parameters.length == 3 && parameters[0] == "post") {
-        if(Object.keys(EFFECTS).includes(parameters[1])) {
-            entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[1]].help));
         }
     }
 
