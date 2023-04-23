@@ -1,14 +1,78 @@
 import { EFFECT_MODE } from "./effects.js";
 import { controlledTokens, effectsAPI } from "./morby-active-effects.js";
 
+const _EFFECT_INFO = {
+    "bless": {
+        name: "Bless",
+        icon: "icons/svg/angel.svg",
+        commands: "bless",
+        changes: [
+            "system.bonuses.All-Attacks",
+            "system.bonuses.abilities.save"
+        ],
+        default: "1d4",
+        seconds: 60,
+        help: "Bonus to be applied by bless. Defaults to 1d4."
+    },
+    "giftofalacrity": {
+        name: "Gift of Alacrity",
+        icon: "icons/skills/movement/figure-running-gray.webp",
+        commands: "giftofalacrity | goa",
+        changes: ["flags.mae.initBonus"],
+        default: "1d8",
+        seconds: 60*60*8,
+        help: "Bonus to be applied to initiative. Defaults to 1d8."
+    },
+    "guidance": {
+        name: "Guidance",
+        icon: "icons/svg/stone-path.svg",
+        commands: "guidance",
+        changes: ["system.bonuses.abilities.check"],
+        default: "1d4",
+        seconds: 60,
+        help: "Bonus to be applied by guidance. Defaults to 1d4."
+    },
+    "heroism": {
+        name: "Heroism",
+        icon: "icons/magic/life/heart-cross-strong-blue.webp",
+        commands: "heroism",
+        changes: ["flags.mae.heroismTempHP"],
+        default: null,
+        seconds: 60,
+        help: "Temporary HP to apply at the start of turn."
+    },
+    "initiativebonus": {
+        name: "Initiative Bonus",
+        icon: "icons/skills/movement/arrows-up-trio-red.webp",
+        commands: "initiativebonus | initbonus | ib",
+        changes: ["flags.mae.initBonus"],
+        default: "1d8",
+        seconds: 60*60*8,
+        help: "Bonus to be applied to initiative. Defaults to 1d8."
+    },
+    "lacerated": {
+        name: "Lacerated",
+        icon: "icons/skills/wounds/injury-triple-slash-bleed.webp",
+        commands: "lacerated | lace",
+        changes: ["flags.mae.lacerated"],
+        default: null,
+        seconds: 60,
+        help: "Damage to apply at the start of turn."
+    }
+};
+
 const EFFECTS = {
-    "bless": { name: "Bless", icon: "icons/svg/angel.svg", commands: "bless" },
-    "giftofalacrity": { name: "Gift of Alacrity", icon: "icons/skills/movement/figure-running-gray.webp", commands: "giftofalacrity | goa" },
-    "guidance": { name: "Guidance", icon: "icons/svg/stone-path.svg", commands: "guidance" },
-    "heroism": { name: "Heroism", icon: "icons/magic/life/heart-cross-strong-blue.webp", commands: "heroism" },
-    "initiativebonus": { name: "Initiative Bonus", icon: "icons/skills/movement/arrows-up-trio-red.webp", commands: "initiativebonus | initbonus | ib" },
-    "lacerated": { name: "Lacerated", icon: "icons/skills/wounds/injury-triple-slash-bleed.webp", commands: "lacerated | lace" },
-}
+    "bless": _EFFECT_INFO["bless"],
+    "goa": _EFFECT_INFO["giftofalacrity"],
+    "giftofalacrity": _EFFECT_INFO["giftofalacrity"],
+    "guidance": _EFFECT_INFO["guidance"],
+    "heroism": _EFFECT_INFO["heroism"],
+    "ib": _EFFECT_INFO["initiativebonus"],
+    "initbonus": _EFFECT_INFO["initiativebonus"],
+    "initiativebonus": _EFFECT_INFO["initiativebonus"],
+    "lace": _EFFECT_INFO["lacerated"],
+    "lacerated": _EFFECT_INFO["lacerated"],
+};
 
 export function cm_register(commands) {
     commands.register({
@@ -25,87 +89,30 @@ export function cm_register(commands) {
 
 async function handleCommand(chat, parameters, messageData) {
     parameters = parameters.toLowerCase().split(" ");
-    switch(parameters[0]) {
-        case "lace":
-        case "lacerated":
-            if(!Boolean(parameters[1])) break; // Require a value
+    if(Object.keys(EFFECTS).includes(parameters[0])) {
+        const effectInfo = EFFECTS[parameters[0]];
+        if (Boolean(effectInfo.default) || Boolean(parameters[1])) {
             for (const token of Object.values(controlledTokens)) {
-                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["lacerated"].name);
-                const lacerated = await effectsAPI.buildDefault(null, EFFECTS["lacerated"].name, EFFECTS["lacerated"].icon);
-                lacerated.isTemporary = true;
-                lacerated.seconds = 60;
-                lacerated.turns = null;
-                lacerated.rounds = null;
-                lacerated.changes.length = 0;
-                lacerated.changes.push({key: "flags.mae.lacerated", value: parameters[1], mode: EFFECT_MODE.ADD});
-                await effectsAPI.addEffectOnToken(token.id, EFFECTS["lacerated"].name, lacerated);
+                await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
+                const effect = await effectsAPI.buildDefault(null, effectInfo.name, effectInfo.icon);
+                effect.isTemporary = true;
+                effect.seconds = effectInfo.seconds;
+                effect.turns = null;
+                effect.rounds = null;
+                effect.changes.length = 0;
+                for (const change of effectInfo.changes) {
+                    effect.changes.push({key: change, value: parameters[1] || effectInfo.default, mode: EFFECT_MODE.ADD});
+                }
+                await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
             }
-            break;
-        case "heroism":
-            if(!Boolean(parameters[1])) break; // Require a value
+        }
+    } else if (parameters[0] == "clear") {
+        if(Object.keys(EFFECTS).includes(parameters[1])) {
+            const effectInfo = EFFECTS[parameters[1]];
             for (const token of Object.values(controlledTokens)) {
-                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["heroism"].name);
-                const heroism = await effectsAPI.buildDefault(null, EFFECTS["heroism"].name, EFFECTS["heroism"].icon);
-                heroism.isTemporary = true;
-                heroism.seconds = 60;
-                heroism.turns = null;
-                heroism.rounds = null;
-                heroism.changes.push({key: "flags.mae.heroismTempHP", value: parameters[1], mode: EFFECT_MODE.ADD});
-                await effectsAPI.addEffectOnToken(token.id, EFFECTS["heroism"].name, heroism);
+                await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
             }
-            break;
-        case "ib":
-        case "initbonus":
-        case "initiativebonus":
-            for (const token of Object.values(controlledTokens)) {
-                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["initiativebonus"].name);
-                const initiativeBonus = await effectsAPI.buildDefault(null, EFFECTS["initiativebonus"].name, EFFECTS["initiativebonus"].icon);
-                initiativeBonus.isTemporary = true;
-                initiativeBonus.seconds = 28800;
-                initiativeBonus.turns = null;
-                initiativeBonus.rounds = null;
-                initiativeBonus.changes.push({key: "flags.mae.initBonus", value: parameters[1] || "1d8", mode: EFFECT_MODE.ADD});
-                await effectsAPI.addEffectOnToken(token.id, EFFECTS["initiativebonus"].name, initiativeBonus);
-            }
-            break;
-        case "goa":
-        case "giftofalacrity":
-            for (const token of Object.values(controlledTokens)) {
-                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["giftofalacrity"].name);
-                const giftOfAlacrity = await effectsAPI.buildDefault(null, EFFECTS["giftofalacrity"].name, EFFECTS["giftofalacrity"].icon);
-                giftOfAlacrity.isTemporary = true;
-                giftOfAlacrity.seconds = 28800;
-                giftOfAlacrity.turns = null;
-                giftOfAlacrity.rounds = null;
-                giftOfAlacrity.changes.push({key: "flags.mae.initBonus", value: parameters[1] || "1d8", mode: EFFECT_MODE.ADD});
-                await effectsAPI.addEffectOnToken(token.id, EFFECTS["giftofalacrity"].name, giftOfAlacrity);
-            }
-            break;
-        case "bless":
-            for (const token of Object.values(controlledTokens)) {
-                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["bless"].name);
-                const bless = await effectsAPI.buildDefault(null, EFFECTS["bless"].name, EFFECTS["bless"].icon);
-                bless.isTemporary = true;
-                bless.seconds = 60;
-                bless.turns = null;
-                bless.rounds = null;
-                bless.changes.push({key: "system.bonuses.All-Attacks", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
-                bless.changes.push({key: "system.bonuses.abilities.save", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
-                await effectsAPI.addEffectOnToken(token.id, EFFECTS["bless"].name, bless);
-            }
-            break;
-        case "guidance":
-            for (const token of Object.values(controlledTokens)) {
-                await effectsAPI.removeEffectOnToken(token.id, EFFECTS["guidance"].name);
-                const guidance = await effectsAPI.buildDefault(null, EFFECTS["guidance"].name, EFFECTS["guidance"].icon);
-                guidance.isTemporary = true;
-                guidance.seconds = 60;
-                guidance.turns = null;
-                guidance.rounds = null;
-                guidance.changes.push({key: "system.bonuses.abilities.check", value: parameters[1] || "1d4", mode: EFFECT_MODE.ADD});
-                await effectsAPI.addEffectOnToken(token.id, "Guidance", guidance);
-            }
-            break;
+        }
     }
     return {};
 };
@@ -117,27 +124,21 @@ function handleAutoComplete(menu, alias, parameters) {
         Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[0])).forEach(effect => {
             entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
         });
+        if("clear".startsWith(parameters[0])) {
+            if(entries.length > 0) entries.push(game.chatCommands.createSeparatorElement());
+            entries.push(game.chatCommands.createInfoElement("clear"));
+        }
     } else if(parameters.length == 2) {
         switch(parameters[0]) {
-            case "heroism":
-                entries.push(game.chatCommands.createInfoElement("Temporary HP to apply at the start of turn."));
+            case "clear":
+                Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[1])).forEach(effect => {
+                    entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
+                });
                 break;
-            case "lace":
-            case "lacerated":
-                entries.push(game.chatCommands.createInfoElement("Damage to apply at the start of turn."));
-                break;
-            case "guidance":
-                entries.push(game.chatCommands.createInfoElement("Bonus to be applied by guidance. Defaults to 1d4."));
-                break;
-            case "bless":
-                entries.push(game.chatCommands.createInfoElement("Bonus to be applied by bless. Defaults to 1d4."));
-                break;
-            case "goa":
-            case "giftofalacrity":
-            case "ib":
-            case "initbonus":
-            case "initiativebonus":
-                entries.push(game.chatCommands.createInfoElement("Bonus to be applied to initiative. Defaults to 1d8."));
+            default:
+                if(Object.keys(EFFECTS).includes(parameters[0])) {
+                    entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[0]].help));
+                }
                 break;
         }
     }
