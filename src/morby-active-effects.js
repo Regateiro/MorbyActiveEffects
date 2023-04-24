@@ -1,5 +1,5 @@
 import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
-import { handleTurnStartEffects } from "./effects.js";
+import { handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
 export const targettedTokens = {};
@@ -53,7 +53,8 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
  * Apply spell effects at the start of the turn
  */
 Hooks.on("updateCombat", (combat, turn, diff, userId) => {
-    handleTurnStartEffects(combat);
+    handleTurnEndEffects(combat); // Previous Turn
+    handleTurnStartEffects(combat); // Current Turn
 });
 
 /**

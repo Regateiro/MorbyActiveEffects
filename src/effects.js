@@ -1,29 +1,39 @@
 /**
- * List of effect modes
- */
-export const EFFECT_MODE = {
-    CUSTOM: 0,
-    MULTIPLY: 1,
-    ADD: 2,
-    DOWNGRADE: 3,
-    UPGRADE: 4,
-    OVERRIDE: 5
-};
-
-/**
- * Queue all applicable turn start effects and begin processing
+ * Process all applicable turn start effects and begin processing
  * @param {Combat} combat 
  */
 export function handleTurnStartEffects(combat) {
-    const actor = game.actors.get(combat.combatant?.actorId);
+    const combatant = combat.combatants.get(combat.current.combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     let actorUpdates = {};
 
     if(game.user.isGM) {
         if(actor.flags?.mae?.heroismTempHP) {
-            applyHeroismTempHP(actor, actorUpdates);
+            applyTempHP(actorUpdates, actor, actor.flags.mae.heroismTempHP, "gainst temporary HP from Heroism");
         }
         if(actor.flags?.mae?.lacerated) {
-            applyLaceratedDamage(actor, actorUpdates);
+            applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "suffers damage from the lacerated condition");
+        }
+        if(actor.flags?.mae?.estrike) {
+            applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "suffers damage from the Ensnaring Strike spell");
+        }
+    }
+
+    actor.update(actorUpdates);
+}
+
+/**
+ * Process all applicable turn end effects and begin processing
+ * @param {Combat} combat 
+ */
+export function handleTurnEndEffects(combat) {
+    const combatant = combat.combatants.get(combat.previous.combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+    let actorUpdates = {};
+
+    if(game.user.isGM) {
+        if(actor.flags?.mae?.idinsinuation) {
+            applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "suffers damage from the Id Insinuation spell");
         }
     }
 
@@ -34,8 +44,8 @@ export function handleTurnStartEffects(combat) {
  * Apply heroism spell effect to the actor.
  * @param {Actor5e} actor 
  */
-function applyHeroismTempHP(actor, actorUpdates) {
-    const roll = new Roll(String(actor.flags.mae.heroismTempHP));
+function applyTempHP(actorUpdates, actor, formula, text) {
+    const roll = new Roll(String(formula));
     roll.evaluate({async: false});
 
     // Apply tempHP if it is higher than the current amount
@@ -46,7 +56,7 @@ function applyHeroismTempHP(actor, actorUpdates) {
     // Display Chat Message
     roll.toMessage({
         sound: null,
-        flavor: `${actor.name}'s Heroism effect triggers temporary HP!`,
+        flavor: `${actor.name} ${text}!`,
         speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
     });
 }
@@ -55,8 +65,8 @@ function applyHeroismTempHP(actor, actorUpdates) {
  * Apply lacerated effect damage to the actor.
  * @param {Actor5e} actor 
  */
-function applyLaceratedDamage(actor, actorUpdates) {
-    const roll = new Roll(String(actor.flags.mae.lacerated));
+function applyDamage(actorUpdates, actor, formula, text) {
+    const roll = new Roll(String(formula));
     roll.evaluate({async: false});
 
     // Calculate new HP values
@@ -72,7 +82,7 @@ function applyLaceratedDamage(actor, actorUpdates) {
     // Display Chat Message
     roll.toMessage({
         sound: null,
-        flavor: `${actor.name} suffers damage from the lacerated condition!`,
+        flavor: `${actor.name} ${text}!`,
         speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
     });
 }

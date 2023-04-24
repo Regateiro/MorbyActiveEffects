@@ -1,10 +1,34 @@
-import { EFFECT_MODE } from "./effects.js";
 import { targettedTokens, effectsAPI } from "./morby-active-effects.js";
+
+/**
+ * List of effect modes
+ */
+export const EFFECT_MODE = {
+    CUSTOM: 0,
+    MULTIPLY: 1,
+    ADD: 2,
+    DOWNGRADE: 3,
+    UPGRADE: 4,
+    OVERRIDE: 5
+};
 
 /**
  * Internal effect information
  */
 const _EFFECT_INFO = {
+    "bane": {
+        name: "Bane",
+        icon: "icons/svg/cowled.svg",
+        commands: "bane",
+        changes: [
+            "system.bonuses.All-Attacks",
+            "system.bonuses.abilities.save"
+        ],
+        default: "-1d4",
+        seconds: 60,
+        help: "Bonus to be applied by bane. Defaults to -1d4.",
+        toChatMessage: function (value) { return _toChatMessage("bane", "baned", "to attacks and saves", "-1d4", value); }
+    },
     "bless": {
         name: "Bless",
         icon: "icons/svg/angel.svg",
@@ -17,6 +41,26 @@ const _EFFECT_INFO = {
         seconds: 60,
         help: "Bonus to be applied by bless. Defaults to 1d4.",
         toChatMessage: function (value) { return _toChatMessage("bless", "blessed", "to attacks and saves", "1d4", value); }
+    },
+    "divinefavor": {
+        name: "Divine Favor",
+        icon: "icons/magic/fire/dagger-rune-enchant-blue-gray.webp",
+        commands: "divinefavor | df",
+        changes: ["system.bonuses.weapon.damage"],
+        default: "1d4",
+        seconds: 60,
+        help: "Bonus to be applied to weapon attacks. Defaults to 1d4.",
+        toChatMessage: function (value) { return _toChatMessage("divinefavor", "empowered", "radiant damage on weapon attacks", "1d4", value); }
+    },
+    "ensnaringstrike": {
+        name: "Ensnaring Strike",
+        icon: "icons/svg/net.svg",
+        commands: "ensnaringstrike | es",
+        changes: ["flags.mae.estrike"],
+        default: "1d6",
+        seconds: 60,
+        help: "Damage to apply at the start of turn. Defaults to 1d6.",
+        toChatMessage: function (value) { return _toChatMessage("ensnaringstrike", "being pierced", "damage every turn", "1d6", value); }
     },
     "giftofalacrity": {
         name: "Gift of Alacrity",
@@ -47,6 +91,16 @@ const _EFFECT_INFO = {
         seconds: 60,
         help: "Temporary HP to apply at the start of turn.",
         toChatMessage: function (value) { return _toChatMessage("heroism", "imbued with bravery", "temporary HP every turn", null, value); }
+    },
+    "idinsinuation": {
+        name: "Id Insinuation",
+        icon: "icons/magic/control/hypnosis-mesmerism-pendulum.webp",
+        commands: "idinsinuation | ii",
+        changes: ["flags.mae.idinsinuation"],
+        default: "1d12",
+        seconds: 60,
+        help: "Damage to apply at the start of turn. Defaults to 1d12.",
+        toChatMessage: function (value) { return _toChatMessage("idinsinuation", "affected by id insinuation", "damage every turn", "1d12", value); }
     },
     "initiativebonus": {
         name: "Initiative Bonus",
@@ -100,11 +154,18 @@ function _toChatMessage(effectId, effectVerb, effectDesc, defaultValue, value) {
  * Effect aliases to information mapping
  */
 const EFFECTS = {
+    "bane": _EFFECT_INFO["bane"],
     "bless": _EFFECT_INFO["bless"],
+    "df": _EFFECT_INFO["divinefavor"],
+    "divinefavor": _EFFECT_INFO["divinefavor"],
+    "ensnaringstrike": _EFFECT_INFO["ensnaringstrike"],
+    "es": _EFFECT_INFO["ensnaringstrike"],
     "goa": _EFFECT_INFO["giftofalacrity"],
     "giftofalacrity": _EFFECT_INFO["giftofalacrity"],
     "guidance": _EFFECT_INFO["guidance"],
     "heroism": _EFFECT_INFO["heroism"],
+    "ii": _EFFECT_INFO["idinsinuation"],
+    "idinsinuation": _EFFECT_INFO["idinsinuation"],
     "ib": _EFFECT_INFO["initiativebonus"],
     "initbonus": _EFFECT_INFO["initiativebonus"],
     "initiativebonus": _EFFECT_INFO["initiativebonus"],
