@@ -340,11 +340,11 @@ async function handleDynamicChanges(effectId, token, change) {
         case "enlarge":
             if (change.key.includes("height")) {
                 const currentHeight = Number(token.document.height);
-                newChange.value = currentHeight <= 1 ? -currentHeight * 2 : 1;
+                newChange.value = currentHeight <= 1 ? currentHeight * 2 : 1;
             }
             if (change.key.includes("width")) {
                 const currentWidth = Number(token.document.width);
-                newChange.value = currentWidth <= 1 ? -currentWidth * 2 : 1;
+                newChange.value = currentWidth <= 1 ? currentWidth * 2 : 1;
             }
             break;
     }
