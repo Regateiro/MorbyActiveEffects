@@ -17,6 +17,7 @@ export const EFFECT_MODE = {
  */
 const _EFFECT_INFO = {
     "aid": {
+        id: "aid",
         name: "Aid",
         icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/heal-sky-1.jpg",
         commands: "aid",
@@ -30,6 +31,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("aid", "aided with an extra", "5", "current and maximum HP", value); }
     },
     "bane": {
+        id: "bane",
         name: "Bane",
         icon: "icons/svg/cowled.svg",
         commands: "bane",
@@ -42,6 +44,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("bane", "baned with a", "-1d4", "to attacks and saves", value); }
     },
     "barkskin": {
+        id: "barkskin",
         name: "Barkskin",
         icon: "icons/svg/aura.svg",
         commands: "barkskin",
@@ -51,6 +54,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("barkskin", "protected by barkskin with a minimum of", "16", "to AC", value); }
     },
     "bless": {
+        id: "bless",
         name: "Bless",
         icon: "icons/svg/angel.svg",
         commands: "bless",
@@ -63,6 +67,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("bless", "blessed with an extra", "1d4", "to attacks and saves", value); }
     },
     "divine-favor": {
+        id: "divine-favor",
         name: "Divine Favor",
         icon: "icons/magic/fire/dagger-rune-enchant-blue-gray.webp",
         commands: "divine-favor | df",
@@ -72,6 +77,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("divine-favor", "empowered, enhancing weapon attacks with an extra", "1d4", "radiant damage", value); }
     },
     "enlarge": {
+        id: "enlarge",
         name: "Enlarge/Reduce",
         icon: "icons/svg/upgrade.svg",
         commands: "enlarge",
@@ -82,10 +88,10 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        help: "Damage to add to weapon attacks. Defaults to 1d4.",
         toChatMessage: function (value) { return _toChatMessage("enlarge", "enlarged, doubling their size and enhancing all attacks with an extra", "1d4", "damage", value); }
     },
     "ensnaring-strike": {
+        id: "ensnaring-strike",
         name: "Ensnaring Strike",
         icon: "icons/svg/net.svg",
         commands: "ensnaring-strike | es",
@@ -96,6 +102,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("ensnaring-strike", "being pierced by thorns and taking", "1d6", "piercing damage every turn", value); }
     },
     "gift-of-alacrity": {
+        id: "gift-of-alacrity",
         name: "Gift of Alacrity",
         icon: "icons/skills/movement/figure-running-gray.webp",
         commands: "gift-of-alacrity | goa",
@@ -105,6 +112,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("gift-of-alacrity", "gifted with alacrity, granting a", "1d8", "bonus to initiative", value); }
     },
     "guidance": {
+        id: "guidance",
         name: "Guidance",
         icon: "icons/svg/stone-path.svg",
         commands: "guidance",
@@ -114,6 +122,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("guidance", "guided, gaining a", "1d4", "to skill checks", value); }
     },
     "heroism": {
+        id: "heroism",
         name: "Heroism",
         icon: "icons/magic/life/heart-cross-strong-blue.webp",
         commands: "heroism",
@@ -124,6 +133,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("heroism", "imbued with bravery, receiving", "0", "temporary HP every turn", value); }
     },
     "id-insinuation": {
+        id: "id-insinuation",
         name: "Id Insinuation",
         icon: "icons/magic/control/hypnosis-mesmerism-pendulum.webp",
         commands: "id-insinuation | ii",
@@ -133,6 +143,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("id-insinuation", "suffering from conflicting desires, taking", "1d12", "psychic damage every turn", value); }
     },
     "initiative-bonus": {
+        id: "initiative-bonus",
         name: "Initiative Bonus",
         icon: "icons/skills/movement/arrows-up-trio-red.webp",
         commands: "initiative-bonus | init-bonus | ib",
@@ -143,6 +154,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("initiative-bonus", "more alert, granting a", "1d8", "bonus to initiative", value); }
     },
     "lacerated": {
+        id: "lacerated",
         name: "Lacerated",
         icon: "icons/skills/wounds/injury-triple-slash-bleed.webp",
         commands: "lacerated | lace",
@@ -153,6 +165,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("lacerated", "lacerated, bleeding for", "0", "damage every turn", value); }
     },
     "melfs-acid-arrow": {
+        id: "melfs-acid-arrow",
         name: "Melf's Acid Arrow",
         icon: "icons/svg/acid.svg",
         commands: "melfs-acid-arrow | acid-arrow | maa",
@@ -163,6 +176,7 @@ const _EFFECT_INFO = {
         toChatMessage: function (value) { return _toChatMessage("melfs-acid-arrow", "suffering from acid burns and taking", "2d4", "damage next turn", value); }
     },
     "reduce": {
+        id: "reduce",
         name: "Enlarge/Reduce",
         icon: "icons/svg/downgrade.svg",
         commands: "reduce",
@@ -173,10 +187,23 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        help: "Damage to add to weapon attacks. Defaults to -1d4.",
         toChatMessage: function (value) { return _toChatMessage("reduce", "reduced, halving their size and hindering all attack damage by", "-1d4", "damage every turn", value); }
     },
+    "regenerate": {
+        id: "regenerate",
+        name: "Regenerate",
+        icon: "icons/svg/regen.svg",
+        commands: "regenerate | regen",
+        changes: [
+            {key: "flags.mae.regenerate", value: "10", mode: EFFECT_MODE.ADD}
+        ],
+        locked: false,
+        seconds: 3600,
+        help: "Health to be regenerated. Defaults to 10.",
+        toChatMessage: function (value) { return _toChatMessage("regenerate", "regenerating", "10", "HP every turn", value); }
+    },
     "tashas-caustic-brew": {
+        id: "tashas-caustic-brew",
         name: "Tasha's Caustic Brew",
         icon: "icons/creatures/slimes/slime-movement-dripping-pseudopods-green.webp",
         commands: "tashas-caustic-brew | caustic-brew | tcb",
@@ -242,6 +269,8 @@ const EFFECTS = {
     "acid-arrow": _EFFECT_INFO["melfs-acid-arrow"],
     "melfs-acid-arrow": _EFFECT_INFO["melfs-acid-arrow"],
     "reduce": _EFFECT_INFO["reduce"],
+    "regen": _EFFECT_INFO["regenerate"],
+    "regenerate": _EFFECT_INFO["regenerate"],
     "tcb": _EFFECT_INFO["tashas-caustic-brew"],
     "caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
     "tashas-caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
@@ -311,11 +340,8 @@ export async function applyEffectToAllTargets(effectId, value) {
         effect.turns = null;
         effect.rounds = null;
         for (const change of effectInfo.changes) {
-            if (!effect.locked) {
-                change.value = value || change.value;
-            }
             effect.changes.push(
-                await handleDynamicChanges(effectId, token, change)
+                await handleDynamicChanges(effectInfo, token, change, value)
             );
         }
         // Add the effect to the token
@@ -323,33 +349,36 @@ export async function applyEffectToAllTargets(effectId, value) {
     }
 }
 
-async function handleDynamicChanges(effectId, token, change) {
-    const newChange = { key: change.key, value: change.value, mode: change.mode };
+async function handleDynamicChanges(effectInfo, token, change, value) {
+    change = Object.assign({}, change);
+    if (!effectInfo.locked) {
+        change.value = value || change.value;
+    }
 
-    switch (effectId) {
+    switch (effectInfo.id) {
         case "reduce":
             if (change.key.includes("height")) {
                 const currentHeight = Number(token.document.height);
-                newChange.value = currentHeight <= 1 ? -currentHeight / 2 : -1;
+                change.value = currentHeight <= 1 ? -currentHeight / 2 : -1;
             }
             if (change.key.includes("width")) {
                 const currentWidth = Number(token.document.width);
-                newChange.value = currentWidth <= 1 ? -currentWidth / 2 : -1;
+                change.value = currentWidth <= 1 ? -currentWidth / 2 : -1;
             }
             break;
         case "enlarge":
             if (change.key.includes("height")) {
                 const currentHeight = Number(token.document.height);
-                newChange.value = currentHeight <= 1 ? currentHeight : 1;
+                change.value = currentHeight <= 1 ? currentHeight : 1;
             }
             if (change.key.includes("width")) {
                 const currentWidth = Number(token.document.width);
-                newChange.value = currentWidth <= 1 ? currentWidth : 1;
+                change.value = currentWidth <= 1 ? currentWidth : 1;
             }
             break;
     }
 
-    return newChange;
+    return change;
 }
 
 /**
@@ -395,7 +424,7 @@ function handleAutoComplete(menu, alias, parameters) {
                 break;
             default:
                 // Otherwise, add the help description of the effect specified in the first parameter
-                if(Object.keys(EFFECTS).includes(parameters[0])) {
+                if(Object.keys(EFFECTS).includes(parameters[0]) && EFFECTS[parameters[0]].help) {
                     entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[0]].help));
                 }
                 break;

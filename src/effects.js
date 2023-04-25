@@ -7,20 +7,27 @@ import { effectsAPI } from "./morby-active-effects.js";
 export function handleTurnStartEffects(combat) {
     const combatant = combat.combatants.get(combat.current.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = {};
+    let actorUpdates = {
+        "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
+        "system.attributes.hp.max": Number(actor.system.attributes.hp.max),
+        "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
+    };
 
     if(game.user.isGM) {
         if(actor.flags?.mae?.heroismTempHP) {
-            applyTempHP(actorUpdates, actor, actor.flags.mae.heroismTempHP, "gainst temporary HP from Heroism");
+            applyHP(actorUpdates, actor, true, actor.flags.mae.heroismTempHP, "from Heroism");
         }
         if(actor.flags?.mae?.lacerated) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "suffers damage from the lacerated condition");
+            applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "from the lacerated condition");
         }
         if(actor.flags?.mae?.estrike) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "suffers damage from the Ensnaring Strike");
+            applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "from the Ensnaring Strike");
         }
         if(actor.flags?.mae?.causticbrew) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "suffers damage from the Tasha's Caustic Brew");
+            applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
+        }
+        if(actor.flags?.mae?.regenerate) {
+            applyHP(actorUpdates, actor, false, actor.flags.mae.regenerate, "from Regenerate");
         }
     }
 
@@ -38,10 +45,10 @@ export function handleTurnEndEffects(combat) {
 
     if(game.user.isGM) {
         if(actor.flags?.mae?.idinsinuation) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "suffers damage from the Id Insinuation");
+            applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "from the Id Insinuation");
         }
         if(actor.flags?.mae?.acidarrow) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "suffers damage and recovers from the Melf's Acid Arrow spell effect");
+            applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
             effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
         }
     }
@@ -53,19 +60,29 @@ export function handleTurnEndEffects(combat) {
  * Apply heroism spell effect to the actor.
  * @param {Actor5e} actor 
  */
-function applyTempHP(actorUpdates, actor, formula, text) {
+function applyHP(actorUpdates, actor, isTemporary, formula, text) {
     const roll = new Roll(String(formula));
     roll.evaluate({async: false});
 
-    // Apply tempHP if it is higher than the current amount
-    if(Number(actor.system.attributes.hp.temp) < roll.total) {
-        actorUpdates["system.attributes.hp.temp"] = roll.total;
+    if (isTemporary) {
+        // Apply tempHP if it is higher than the current amount
+        if(actorUpdates["system.attributes.hp.temp"] < roll.total) {
+            actorUpdates["system.attributes.hp.temp"] = roll.total;
+        }
+    } else {
+        if (actorUpdates["system.attributes.hp.value"] == 0 && roll.total > 0) {
+            text = `${text} while at 0HP and is <b>no longer dying</b>`;
+        }
+        actorUpdates["system.attributes.hp.value"] = Math.min(
+            actorUpdates["system.attributes.hp.value"] + roll.total, 
+            actorUpdates["system.attributes.hp.max"]
+        );
     }
 
     // Display Chat Message
     roll.toMessage({
         sound: null,
-        flavor: `${actor.name} ${text}!`,
+        flavor: `${actor.name} recovers ${roll.total}${isTemporary ? " temporary HP" : "HP"} ${text}!`,
         speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
     });
 }
@@ -79,19 +96,27 @@ function applyDamage(actorUpdates, actor, formula, text) {
     roll.evaluate({async: false});
 
     // Calculate new HP values
-    const tempHP = actorUpdates["system.attributes.hp.temp"] || Number(actor.system.attributes.hp.temp);
+    const tempHP = actorUpdates["system.attributes.hp.temp"];
     const newTempHP = Math.max(tempHP - roll.total, 0);
-    const HP = Number(actor.system.attributes.hp.value);
-    const newHP = HP - Math.max(roll.total - tempHP, 0);
+    const HP = actorUpdates["system.attributes.hp.value"];
+    const newHP = Math.max(HP - roll.total + tempHP, 0);
+
+    // Warn if the HP reached 0
+    if(HP > 0 && newHP == 0) {
+        text = `${text} while at ${HP}HP and is now <b>dying</b>`;
+    } else if (newHP == 0) {
+        text = `${text} while <b>dying</b>`;
+    }
 
     // Apply HP
     actorUpdates["system.attributes.hp.temp"] = newTempHP;
     actorUpdates["system.attributes.hp.value"] = newHP;
 
+
     // Display Chat Message
     roll.toMessage({
         sound: null,
-        flavor: `${actor.name} ${text}!`,
+        flavor: `${actor.name} suffers ${roll.total} points of damage ${text}!`,
         speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
     });
 }
