@@ -55,6 +55,15 @@
                     "minimum": "0.9.8",
                     "verified": "0.9.8"
                 }
+            },
+            {
+                "id": "ATL",
+                "type": "module",
+                "manifest": "https://github.com/kandashi/Active-Token-Lighting/releases/latest/download/module.json",
+                "compatibility": {
+                    "minimum": "0.5.3",
+                    "verified": "0.5.3"
+                }
             }
         ]
     },

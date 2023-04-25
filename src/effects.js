@@ -1,3 +1,5 @@
+import { effectsAPI } from "./morby-active-effects.js";
+
 /**
  * Process all applicable turn start effects and begin processing
  * @param {Combat} combat 
@@ -15,7 +17,10 @@ export function handleTurnStartEffects(combat) {
             applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "suffers damage from the lacerated condition");
         }
         if(actor.flags?.mae?.estrike) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "suffers damage from the Ensnaring Strike spell");
+            applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "suffers damage from the Ensnaring Strike");
+        }
+        if(actor.flags?.mae?.causticbrew) {
+            applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "suffers damage from the Tasha's Caustic Brew");
         }
     }
 
@@ -33,7 +38,11 @@ export function handleTurnEndEffects(combat) {
 
     if(game.user.isGM) {
         if(actor.flags?.mae?.idinsinuation) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "suffers damage from the Id Insinuation spell");
+            applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "suffers damage from the Id Insinuation");
+        }
+        if(actor.flags?.mae?.acidarrow) {
+            applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "suffers damage and recovers from the Melf's Acid Arrow spell effect");
+            effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
         }
     }
 
