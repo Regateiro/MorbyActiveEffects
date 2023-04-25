@@ -27,7 +27,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Bonus to be applied by aid. Defaults to 5.",
-        toChatMessage: function (value) { return _toChatMessage("bane", "aided", "to current and maximum HP", value); }
+        toChatMessage: function (value) { return _toChatMessage("aid", "aided with an extra", "5", "current and maximum HP", value); }
     },
     "bane": {
         name: "Bane",
@@ -39,7 +39,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("bane", "baned", "to attacks and saves", value); }
+        toChatMessage: function (value) { return _toChatMessage("bane", "baned with a", "-1d4", "to attacks and saves", value); }
     },
     "barkskin": {
         name: "Barkskin",
@@ -48,7 +48,7 @@ const _EFFECT_INFO = {
         changes: [{key: "system.attributes.ac.value", value: "16", mode: EFFECT_MODE.UPGRADE}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("barkskin", "protected", "minimum to AC", value); }
+        toChatMessage: function (value) { return _toChatMessage("barkskin", "protected by barkskin with a minimum of", "16", "to AC", value); }
     },
     "bless": {
         name: "Bless",
@@ -60,7 +60,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("bless", "blessed", "to attacks and saves", value); }
+        toChatMessage: function (value) { return _toChatMessage("bless", "blessed with an extra", "1d4", "to attacks and saves", value); }
     },
     "divine-favor": {
         name: "Divine Favor",
@@ -69,7 +69,7 @@ const _EFFECT_INFO = {
         changes: [{key: "system.bonuses.weapon.damage", value: "1d4", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("divinefavor", "empowered, enhancing weapon attacks with an extra", "1d4", "radiant damage", value); }
+        toChatMessage: function (value) { return _toChatMessage("divine-favor", "empowered, enhancing weapon attacks with an extra", "1d4", "radiant damage", value); }
     },
     "enlarge": {
         name: "Enlarge/Reduce",
@@ -93,7 +93,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Damage to apply at the start of turn. Defaults to 1d6.",
-        toChatMessage: function (value) { return _toChatMessage("ensnaringstrike", "being pierced by thorns and taking", "1d6", "piercing damage every turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("ensnaring-strike", "being pierced by thorns and taking", "1d6", "piercing damage every turn", value); }
     },
     "gift-of-alacrity": {
         name: "Gift of Alacrity",
@@ -102,7 +102,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.initBonus", value: "1d8", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60*60*8,
-        toChatMessage: function (value) { return _toChatMessage("giftofalacrity", "gifted with alacrity, granting a", "1d8", "bonus to initiative", value); }
+        toChatMessage: function (value) { return _toChatMessage("gift-of-alacrity", "gifted with alacrity, granting a", "1d8", "bonus to initiative", value); }
     },
     "guidance": {
         name: "Guidance",
@@ -130,7 +130,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.idinsinuation", value: "1d12", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("idinsinuation", "suffering from conflicting desires, taking", "1d12", "psychic damage every turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("id-insinuation", "suffering from conflicting desires, taking", "1d12", "psychic damage every turn", value); }
     },
     "initiative-bonus": {
         name: "Initiative Bonus",
@@ -140,7 +140,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60*60*8,
         help: "Bonus to be applied to initiative. Defaults to 1d8.",
-        toChatMessage: function (value) { return _toChatMessage("initiativebonus", "more alert, granting a", "1d8", "bonus to initiative", value); }
+        toChatMessage: function (value) { return _toChatMessage("initiative-bonus", "more alert, granting a", "1d8", "bonus to initiative", value); }
     },
     "lacerated": {
         name: "Lacerated",
@@ -160,7 +160,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Damage to apply at the end of turn.",
-        toChatMessage: function (value) { return _toChatMessage("melfsacidarrow", "suffering from acid burns and taking", "2d4", "damage next turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("melfs-acid-arrow", "suffering from acid burns and taking", "2d4", "damage next turn", value); }
     },
     "reduce": {
         name: "Enlarge/Reduce",
@@ -184,7 +184,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Damage to apply at the start of turn. Defaults to 2d4.",
-        toChatMessage: function (value) { return _toChatMessage("tashascausticbrew", "suffering from acid burns and taking", "2d4", "acid damage every turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("tashas-caustic-brew", "suffering from acid burns and taking", "2d4", "acid damage every turn", value); }
     }
 };
 
