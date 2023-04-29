@@ -32,6 +32,8 @@ To use one of the effects in the table, just target the tokens that you wish to 
 
 For effects with large names, such as Id Insinuation, you may use an alias instead of the name, i.e. `/mae ii <X>`.
 
+Furthermore, if the `<X>` value is not provided to an effect that accepts one, the default value will be used instead.
+
 ### Token Ownership and Applying Effects
 
 Upon executing a command to apply an effect, the effect will only be automatically applied on token you have ownership over, as a player will usually lack the permissions to access another player's character token.
