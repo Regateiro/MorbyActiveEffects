@@ -28,11 +28,9 @@ The list of supported effects/conditions is shown in the table below.
 | Regenerate           | +X healing at the start of turn    | Yes (10)               | /mae regenerate  \<X\>         | regen             |
 | Tasha's Caustic Brew | +X damage at the start of turn     | Yes (2d4)              | /mae tashas-caustic-brew \<X\> | caustic-brew, tcb |
 
-To use one of the effects in the table, just target the tokens that you wish to apply the effect to and write the command in chat as shown. If the command includes an  \<X\>, replace it with the value you wish the effect to use. For example, if you wish to apply an Heroism effect that gives 4 temporary HP each turn, you need to target the tokens and write `/mae heroism 4` into the chat.
+To use one of the effects in the table, just target the tokens that you wish to apply the effect to and write the command in chat as shown. If the command includes an  `<X>`, replace it with the value you wish the effect to use. For example, if you wish to apply an Heroism effect that gives 4 temporary HP each turn, you need to target the tokens and write `/mae heroism 4` into the chat. If the `<X>` value is not provided, the default value will be used instead.
 
 For effects with large names, such as Id Insinuation, you may use an alias instead of the name, i.e. `/mae ii <X>`.
-
-Furthermore, if the `<X>` value is not provided to an effect that accepts one, the default value will be used instead.
 
 ### Token Ownership and Applying Effects
 
