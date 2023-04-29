@@ -30,6 +30,8 @@ The list of supported effects/conditions is shown in the table below.
 
 To use one of the effects in the table, just target the tokens that you wish to apply the effect to and write the command in chat as shown. If the command includes an  \<X\>, replace it with the value you wish the effect to use. For example, if you wish to apply an Heroism effect that gives 4 temporary HP each turn, you need to target the tokens and write `/mae heroism 4` into the chat.
 
+For effects with large names, such as Id Insinuation, you may use an alias instead of the name, i.e. `/mae ii <X>`.
+
 ### Token Ownership and Applying Effects
 
 Upon executing a command to apply an effect, the effect will only be automatically applied on token you have ownership over, as a player will usually lack the permissions to access another player's character token.
@@ -38,7 +40,7 @@ However, upon executing a command, a chat message will also appear which indicat
 
 ### Clearing Effects
 
-To clear effects applied by the Morby Active Effects module, you can just delete the effect from the token using the character sheet, or by using the clear command while targeting the desired token as follows: `/mae clear <effect name>`
+To clear effects applied by the Morby Active Effects module, you can just delete the effect from the token using the character sheet, or by using the clear command while targeting the desired token as follows: `/mae clear <effect name>`.
 
 ## Targeting Players / Enemies for Effects
 
