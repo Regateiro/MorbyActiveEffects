@@ -34,7 +34,7 @@ For effects with large names, such as Id Insinuation, you may use an alias inste
 
 ### Token Ownership and Applying Effects
 
-Upon executing a command to apply an effect, the effect will only be automatically applied on token you have ownership over, as a player will usually lack the permissions to access another player's character token.
+Upon executing a command to apply an effect, the effect will only be automatically applied on tokens you have ownership over, as a player will usually lack the permissions to access another player's character token.
 
 However, upon executing a command, a chat message will also appear which indicates on whom the effect is being placed and contains a button that allows the affected players to target their own tokens and apply the effect themselves.
 
@@ -48,7 +48,7 @@ This module uses [Smart Target](https://foundryvtt.com/packages/smarttarget) to 
 
 In short, to target a token you just need to hold the `alt` key while clicking on the token. To target multiple tokens, hold `shift + alt` while clicking on the tokens. However, make sure you click on the canvas before pressing `alt` if you've just used the chat or it won't work (yey for foundry).
 
-Look into the Smart Target configuration options if you'd rather use sticky targeting (you just need to press `alt` to target multiple tokens but you need to click on token again to untarget), or to change other settings.
+Look into the Smart Target configuration options if you'd rather use sticky targeting (you just need to press `alt` to target multiple tokens but you need to click on the tokens again to untarget them), or to change other settings.
 
 ## Future Module Features
 
