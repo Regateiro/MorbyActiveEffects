@@ -66,6 +66,16 @@ const _EFFECT_INFO = {
         seconds: 60,
         toChatMessage: function (value) { return _toChatMessage("bless", "blessed with an extra", "1d4", "to attacks and saves", value); }
     },
+    "blood-boil": {
+        id: "blood-boil",
+        name: "Blood Boil",
+        icon: "icons/svg/angel.svg",
+        commands: "blood-boil | bb",
+        changes: [{key: "flags.mae.bloodboil", value: "7d6", mode: EFFECT_MODE.ADD}],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function (value) { return _toChatMessage("blood-boil", "agonized with superheated blood, taking", "7d6", "fire damage on a failed CON save each turn", value); }
+    },
     "divine-favor": {
         id: "divine-favor",
         name: "Divine Favor",
@@ -236,7 +246,7 @@ function _toChatMessage(effectId, preText, effectValue, postText, value) {
     // Use the default value if the other value is not given
     value = value || effectValue;
     // Define the apply button for other users
-    const button = `<button class='morby-active-effects' data-effect-id=${effectId} data-effect-value=${value}><i class="fas fa-hand-holding-magic"></i>Apply Effect</button>`;
+    const button = `<button class='mae-apply-effect' data-effect-id=${effectId} data-effect-value=${value}><i class="fas fa-hand-holding-magic"></i>Apply Effect</button>`;
     // return the code
     return `${targets} ${targetVerb} now ${preText} ${value} ${postText}. ${button}`;
 }
@@ -249,6 +259,8 @@ const EFFECTS = {
     "bane": _EFFECT_INFO["bane"],
     "barkskin": _EFFECT_INFO["barkskin"],
     "bless": _EFFECT_INFO["bless"],
+    "bb": _EFFECT_INFO["blood-boil"],
+    "blood-boil": _EFFECT_INFO["blood-boil"],
     "df": _EFFECT_INFO["divine-favor"],
     "divine-favor": _EFFECT_INFO["divine-favor"],
     "enlarge": _EFFECT_INFO["enlarge"],
@@ -310,7 +322,7 @@ async function handleCommand(chat, parameters, messageData) {
         const effectInfo = EFFECTS[parameters[0]];
         // For each token that is selected
         await applyEffectToAllTargets(parameters[0], parameters[1]);
-        ChatLog.prototype.processMessage(effectInfo.toChatMessage(parameters[1]));
+        await ChatMessage.create({content: effectInfo.toChatMessage(parameters[1])});
     // If the first parameter is a clear command
     } else if (parameters[0] == "clear") {
         // Determine if the second parameter corresponds to an effect
