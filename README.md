@@ -8,32 +8,33 @@ This includes adding bonuses to attack/damage rolls, dealing damage/healing at t
 
 The list of supported effects/conditions is shown in the table below.
 
-| Effect Name          | Description                                    | Custom Value (Default) | Command                        | Aliases           |
-| -------------------- | ---------------------------------------------- | ---------------------- | ------------------------------ | ----------------- |
-| Aid                  | +X to current and maximum HP                   | Yes (5)                | /mae aid \<X\>                 |                   |
-| Bane                 | -1d4 to attacks and saving throws              | No                     | /mae bane                      |                   |
-| Barkskin             | 16 minimum to AC                               | No                     | /mae barkskin                  | bark              |
-| Bless                | +1d4 to attacks and saving throws              | No                     | /mae bless                     |                   |
-| Divine Favor         | +1d4 to weapon damage                          | No                     | /mae divine-favor              | df                |
-| Blood Boil           | +7d6 damage at the end of turn on failed save  | No                     | /mae blood-boil                | bb                |
-| Enlarge              | +1d4 to weapon damage + token size             | No                     | /mae enlarge                   |                   |
-| Ensnaring Strike     | +X damage at the start of turn                 | Yes (1d6)              | /mae ensnaring-strike \<X\>    | es                |
-| Gift of Alacrity     | +1d8 to initiative rolls                       | No                     | /mae gift-of-alacrity          | goa               |
-| Guidance             | +1d4 to skill checks                           | No                     | /mae guidance                  |                   |
-| Heroism              | X temp HP at the start of turn                 | Yes (0)                | /mae heroism \<X\>             |                   |
-| Id Insinuation       | +1d12 damage at the end of turn                | No                     | /mae id-insinuation            | ii                |
-| Immolation           | +6d6 damage at the end of turn on failed save  | No                     | /mae immolation                | im                |
-| Initiative Bonus     | +X to the next initiative roll                 | Yes (1d8)              | /mae initiative-bonus \<X\>    | init-bonus, ib    |
-| Killing Winds        | +4d12 damage at the end of turn on failed save | No                     | /mae killing-winds             | kw                |
-| Lacerated            | +X damage at the start of turn                 | Yes (0)                | /mae lacerated  \<X\>          | lace              |
-| Melf's Acid Arrow    | +X damage at the end of turn                   | Yes (2d4)              | /mae melfs-acid-arrow \<X\>    | acid-arrow, maa   |
-| Phantasmal Killer    | +X damage at the end of turn on failed save    | Yes (6d10)             | /mae phantasmal-killer \<X\>   | pkiller, pk       |
-| Reality Break        | +6\|8\|10d12 damage at the end of turn         | No                     | /mae reality-break             | rbreak, rb        |
-| Reduce               | -1d4 to weapon damage - token size             | No                     | /mae reduce                    |                   |
-| Regenerate           | +X healing at the start of turn                | Yes (10)               | /mae regenerate \<X\>          | regen             |
-| Tasha's Caustic Brew | +X damage at the start of turn                 | Yes (2d4)              | /mae tashas-caustic-brew \<X\> | caustic-brew, tcb |
-| Vitriolic Sphere     | +X damage at the end of turn                   | Yes (5d4)              | /mae vitriolic-sphere \<X\>    | vsphere, vs       |
-| Voracious Poison     | +16d8 damage at the end of turn on failed save | No                     | /mae voracious-poison          | vpoison, vp       |
+| Effect Name          | Description                                     | Custom Value (Default) | Command                        | Aliases           |
+| -------------------- | ----------------------------------------------- | ---------------------- | ------------------------------ | ----------------- |
+| Aid                  | +X to current and maximum HP                    | Yes (5)                | /mae aid \<X\>                 |                   |
+| Bane                 | -1d4 to attacks and saving throws               | No                     | /mae bane                      |                   |
+| Barkskin             | 16 minimum to AC                                | No                     | /mae barkskin                  | bark              |
+| Bless                | +1d4 to attacks and saving throws               | No                     | /mae bless                     |                   |
+| Divine Favor         | +1d4 to weapon damage                           | No                     | /mae divine-favor              | df                |
+| Blood Boil           | +7d6 damage at the end of turn on failed save   | No                     | /mae blood-boil                | bb                |
+| Enlarge              | +1d4 to weapon damage + token size              | No                     | /mae enlarge                   |                   |
+| Ensnaring Strike     | +X damage at the start of turn                  | Yes (1d6)              | /mae ensnaring-strike \<X\>    | es                |
+| Gift of Alacrity     | +1d8 to initiative rolls                        | No                     | /mae gift-of-alacrity          | goa               |
+| Guidance             | +1d4 to skill checks                            | No                     | /mae guidance                  |                   |
+| Heroism              | X temp HP at the start of turn                  | Yes (0)                | /mae heroism \<X\>             |                   |
+| Id Insinuation       | +1d12 damage at the end of turn                 | No                     | /mae id-insinuation            | ii                |
+| Immolation           | +6d6 damage at the end of turn on failed save   | No                     | /mae immolation                | im                |
+| Initiative Bonus     | +X to the next initiative roll                  | Yes (1d8)              | /mae initiative-bonus \<X\>    | init-bonus, ib    |
+| Killing Winds        | +4d12 damage at the end of turn on failed save  | No                     | /mae killing-winds             | kw                |
+| Lacerated            | +X damage at the start of turn                  | Yes (0)                | /mae lacerated  \<X\>          | lace              |
+| Melf's Acid Arrow    | +X damage at the end of turn                    | Yes (2d4)              | /mae melfs-acid-arrow \<X\>    | acid-arrow, maa   |
+| Phantasmal Killer    | +X damage at the end of turn on failed save     | Yes (6d10)             | /mae phantasmal-killer \<X\>   | pkiller, pk       |
+| Reality Break        | +6\|8\|10d12 damage at the end of turn          | No                     | /mae reality-break             | rbreak, rb        |
+| Reduce               | -1d4 to weapon damage - token size              | No                     | /mae reduce                    |                   |
+| Regenerate           | +X healing at the start of turn                 | Yes (10)               | /mae regenerate \<X\>          | regen             |
+| Tasha's Caustic Brew | +X damage at the start of turn                  | Yes (2d4)              | /mae tashas-caustic-brew \<X\> | caustic-brew, tcb |
+| Vitriolic Sphere     | +X damage at the end of turn                    | Yes (5d4)              | /mae vitriolic-sphere \<X\>    | vsphere, vs       |
+| Voracious Poison     | +16d8 damage at the end of turn on failed save  | No                     | /mae voracious-poison          | vpoison, vp       |
+| Weird                | +11d10 damage at the end of turn on failed save | No                     | /mae weird                     |                   |
 
 To use one of the effects in the table, just target the tokens that you wish to apply the effect to and write the command in chat as shown. If the command includes an  `<X>`, replace it with the value you wish the effect to use. For example, if you wish to apply an Heroism effect that gives 4 temporary HP each turn, you need to target the tokens and write `/mae heroism 4` into the chat. If the `<X>` value is not provided, the default value will be used instead.
 

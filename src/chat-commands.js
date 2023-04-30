@@ -286,6 +286,16 @@ const _EFFECT_INFO = {
         locked: true,
         seconds: 60,
         toChatMessage: function (value) { return _toChatMessage("voracious-poison", "poisoned, taking", "16d8", "poison on a failed CON save each turn", value); }
+    },
+    "weird": {
+        id: "weird",
+        name: "Weird",
+        icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/horror-acid-3.jpg",
+        commands: "weird",
+        changes: [{key: "flags.mae.weird", value: "11d10", mode: EFFECT_MODE.ADD}],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function (value) { return _toChatMessage("weird", "facing their deepest fears, taking", "11d10", "psychic on a failed WIS save each turn", value); }
     }
 };
 
@@ -367,6 +377,7 @@ const EFFECTS = {
     "vp": _EFFECT_INFO["voracious-poison"],
     "vpoison": _EFFECT_INFO["voracious-poison"],
     "voracious-poison": _EFFECT_INFO["voracious-poison"],
+    "weird": _EFFECT_INFO["weird"],
 };
 
 /**
