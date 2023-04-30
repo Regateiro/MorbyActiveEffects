@@ -54,6 +54,9 @@ export function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.immolation) {
         requestSave(combatant, actor, actor.flags.mae.immolation, "DEX", "Immolation");
     }
+    if(actor.flags?.mae?.killingwinds) {
+        requestSave(combatant, actor, actor.flags.mae.killingwinds, "CON", "Killing Winds");
+    }
 
     actor.update(actorUpdates);
 }
