@@ -1,5 +1,5 @@
 import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
-import { handleSaveEffectFailure, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
+import { handleSaveEffectDamage, handleSaveResolved, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
 export const targettedTokens = {};
@@ -19,13 +19,17 @@ Hooks.once("ready", () => {
     });
     // Bind save success buttons to the callback
     $(document).on('click', '.mae-save-success', function () {
-        effectsAPI.removeEffectOnToken($(this).data('token-id'), $(this).data('effect-name'));
+        let actorUpgrades = null;
+        if (Boolean($(this).data('remove'))) effectsAPI.removeEffectOnToken($(this).data('token-id'), $(this).data('effect-name'));
+        if (Boolean($(this).data('half-damage'))) actorUpgrades = handleSaveEffectDamage($(this).data('token-id'), $(this).data('actor-id'), $(this).data('effect-formula'), $(this).data('effect-name'), true);
         game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+        handleSaveResolved(actorUpgrades, $(this).data('token-id'), $(this).data('actor-id'), $(this).data('timestamp'));
     });
     // Bind save failure buttons to the callback
     $(document).on('click', '.mae-save-failure', function () { 
-        handleSaveEffectFailure($(this).data('token-id'), $(this).data('actor-id'), $(this).data('effect-formula'), $(this).data('effect-name'));
+        let actorUpgrades = handleSaveEffectDamage($(this).data('token-id'), $(this).data('actor-id'), $(this).data('effect-formula'), $(this).data('effect-name'), false);
         game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+        handleSaveResolved(actorUpgrades, $(this).data('token-id'), $(this).data('actor-id'), $(this).data('timestamp'));
     });
 });
 

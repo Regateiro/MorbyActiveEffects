@@ -1,5 +1,7 @@
 import { effectsAPI } from "./morby-active-effects.js";
 
+let pendingTriggers = {};
+
 /**
  * Process all applicable turn start effects and begin processing
  * @param {Combat} combat 
@@ -7,12 +9,10 @@ import { effectsAPI } from "./morby-active-effects.js";
 export function handleTurnStartEffects(combat) {
     const combatant = combat.combatants.get(combat.current.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = {
-        "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
-        "system.attributes.hp.max": Number(actor.system.attributes.hp.max),
-        "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
-    };
+    let actorUpdates = generateActorUpdates(actor);
 
+    let saveRequests = 0;
+    const timestamp = String(Date.now());
     if(actor.flags?.mae?.heroismTempHP) {
         applyHP(actorUpdates, actor, true, actor.flags.mae.heroismTempHP, "from Heroism");
     }
@@ -25,10 +25,35 @@ export function handleTurnStartEffects(combat) {
     if(actor.flags?.mae?.causticbrew) {
         applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
     }
+    if(actor.flags?.mae?.rbreak) {
+        saveRequests += handleRealityBreak(actorUpdates, combatant, actor, timestamp);
+    }
     if(actor.flags?.mae?.regenerate) {
-        applyHP(actorUpdates, actor, false, actor.flags.mae.regenerate, "from Regenerate");
+        if(saveRequests == 0) {
+            applyHP(actorUpdates, actor, false, actor.flags.mae.regenerate, "from Regenerate");
+        } else {
+            pendingTriggers[timestamp] = {
+                "saveRequests": saveRequests,
+                "trigger": function(au) { applyCombatantHP(au, combatant._id, false, actor.flags.mae.regenerate, "from Regenerate") }
+            };
+        }
     }
 
+    actor.update(actorUpdates);
+}
+
+export function handleSaveResolved(actorUpdates, tokenId, actorId, timestamp) {
+    const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
+    if (!actorUpdates) {
+        actorUpdates = generateActorUpdates(actor);
+    }
+    if (pendingTriggers[timestamp]) {
+        pendingTriggers[timestamp]["saveRequests"] = pendingTriggers[timestamp]["saveRequests"] - 1;
+        if (pendingTriggers[timestamp]["saveRequests"] == 0) {
+            pendingTriggers[timestamp]["trigger"](actorUpdates);
+            delete pendingTriggers[timestamp];
+        }
+    }
     actor.update(actorUpdates);
 }
 
@@ -60,6 +85,9 @@ export function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.pkiller) {
         requestSave(combatant, actor, actor.flags.mae.pkiller, "WIS", "Phantasmal Killer");
     }
+    if(actor.flags?.mae?.rbreak) {
+        requestSave(combatant, actor, "", "WIS", "Reality Break");
+    }
 
     actor.update(actorUpdates);
 }
@@ -68,17 +96,22 @@ export function handleTurnEndEffects(combat) {
  * Process all applicable turn end effects and begin processing
  * @param {Combat} combat 
  */
-export function handleSaveEffectFailure(tokenId, actorId, formula, effectName) {
-    const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
+export function handleSaveEffectDamage(tokenId, actorId, formula, effectName, halfDamage) {
+    if (!formula) return;
 
-    let actorUpdates = {
+    const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
+    let actorUpdates = generateActorUpdates(actor);
+
+    applyDamage(actorUpdates, actor, formula, `from the ${effectName}`, halfDamage);
+    return actorUpdates;
+}
+
+function generateActorUpdates(actor) {
+    return {
         "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
         "system.attributes.hp.max": Number(actor.system.attributes.hp.max),
         "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
     };
-
-    applyDamage(actorUpdates, actor, formula, `from the ${effectName}`);
-    actor.update(actorUpdates);
 }
 
 /**
@@ -105,26 +138,39 @@ function applyHP(actorUpdates, actor, isTemporary, formula, text) {
     }
 
     // Display Chat Message
-    roll.toMessage({
-        sound: null,
-        flavor: `${actor.name} recovers ${roll.total}${isTemporary ? " temporary HP" : "HP"} ${text}!`,
-        speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
+    roll.toMessage({ sound: null, speaker: null,
+        flavor: `${actor.name} recovers ${roll.total}${isTemporary ? " temporary HP" : "HP"} ${text}!`
     });
+}
+
+/**
+ * Apply heroism spell effect to the actor.
+ * @param {Actor5e} actor 
+ */
+function applyCombatantHP(actorUpdates, combatantId, isTemporary, formula, text) {
+    const combatant = game.combat.combatants.get(combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+    applyHP(actorUpdates, actor, isTemporary, formula, text);
 }
 
 /**
  * Apply lacerated effect damage to the actor.
  * @param {Actor5e} actor 
  */
-function applyDamage(actorUpdates, actor, formula, text) {
+function applyDamage(actorUpdates, actor, formula, text, halfDamage = false) {
     const roll = new Roll(String(formula));
     roll.evaluate({async: false});
 
+    let damage = roll.total;
+    if (halfDamage) {
+        damage = Math.floor(roll.total / 2);
+    }
+
     // Calculate new HP values
     const tempHP = actorUpdates["system.attributes.hp.temp"];
-    const newTempHP = Math.max(tempHP - roll.total, 0);
+    const newTempHP = Math.max(tempHP - damage, 0);
     const HP = actorUpdates["system.attributes.hp.value"];
-    const newHP = Math.max(HP - roll.total + tempHP, 0);
+    const newHP = Math.max(HP - damage + tempHP, 0);
 
     // Warn if the HP reached 0
     if(HP > 0 && newHP == 0) {
@@ -139,10 +185,8 @@ function applyDamage(actorUpdates, actor, formula, text) {
 
 
     // Display Chat Message
-    roll.toMessage({
-        sound: null,
-        flavor: `${actor.name} suffers ${roll.total} points of damage ${text}!`,
-        speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
+    roll.toMessage({ sound: null, speaker: null,
+        flavor: `${actor.name} suffers ${damage} points of damage ${text}!`
     });
 }
 
@@ -150,10 +194,52 @@ function applyDamage(actorUpdates, actor, formula, text) {
  * Apply lacerated effect damage to the actor.
  * @param {Actor5e} combatant 
  */
-function requestSave(combatant, actor, formula, save, effectName) {
+function requestSave(combatant, actor, formula, save, effectName, removeOnSave = true, halfDamage = false, timestamp) {
     // Define the apply button for other users
-    const success = `<button class='mae-save-success' data-token-id='${combatant.tokenId}' data-effect-name='${effectName}'><i class="fas fa-check"></i>Success</button>`;
-    const fail = `<button class='mae-save-failure' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}'><i class="fas fa-xmark"></i>Failure</button>`;
+    const success = `<button class='mae-save-success' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
+    const fail = `<button class='mae-save-failure' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
     ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
+}
+
+function handleRealityBreak(actorUpdates, combatant, actor, timestamp) {
+    const roll = new Roll("1d10");
+    roll.evaluate({async: false});
+
+    switch (roll.total) {
+        case 1:
+        case 2:
+            // Display Chat Message
+            roll.toMessage({ sound: null, speaker: null,
+                flavor: `${actor.name} is sees a Vision of the Far Realm from Reality Break and is <b>stunned</b> until the end of the turn!`
+            });
+            applyDamage(actorUpdates, actor, "6d12", "from Reality Break's Vision of the Far Realm");
+            return 0;
+        case 3:
+        case 4:
+        case 5:
+            // Display Chat Message
+            roll.toMessage({ sound: null, speaker: null,
+                flavor: `${actor.name} is swallowed by a Rending Rift from Reality Break!`
+            });
+            requestSave(combatant, actor, "8d12", "DEX", "Reality Break's Rending Rift", false, true, timestamp);
+            return 1;
+        case 6:
+        case 7:
+        case 8:
+            // Display Chat Message
+            roll.toMessage({ sound: null, speaker: null,
+                flavor: `${actor.name} teleports up to 30 feet through a wormhole from Reality Break and is knocked <b>prone</b>!`
+            });
+            applyDamage(actorUpdates, actor, "10d12", "from Reality Break's Wormhole");
+            return 0;
+        case 9:
+        case 10:
+            // Display Chat Message
+            roll.toMessage({ sound: null, speaker: null,
+                flavor: `${actor.name} chilled by the Dark Void from Reality Break and is <b>blinded</b> until the end of the turn!`
+            });
+            applyDamage(actorUpdates, actor, "10d12", "from Reality Break's Dark Void");
+    }
+    return 0;
 }

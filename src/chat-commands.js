@@ -213,6 +213,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.pkiller", value: "6d10", mode: EFFECT_MODE.ADD}],
         locked: false,
         seconds: 60,
+        help: "Damage to apply at the end of turn.",
         toChatMessage: function (value) { return _toChatMessage("phantasmal-killer", "facing their deepest fears, taking", "6d10", "psychic damage on a failed WIS save each turn", value); }
     },
     "reduce": {
@@ -228,6 +229,18 @@ const _EFFECT_INFO = {
         locked: true,
         seconds: 60,
         toChatMessage: function (value) { return _toChatMessage("reduce", "reduced, halving their size and hindering all attack damage by", "-1d4", "damage every turn", value); }
+    },
+    "reality-break": {
+        id: "reality-break",
+        name: "Reality Break",
+        icon: "icons/svg/regen.svg",
+        commands: "reality-break | rbreak | rb",
+        changes: [
+            {key: "flags.mae.rbreak", value: "1", mode: EFFECT_MODE.ADD}
+        ],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function (value) { return _toChatMessage("reality-break", "in turmoil and madness, suffering", "6d12, 8d12, or 10d12", "damage every turn", value); }
     },
     "regenerate": {
         id: "regenerate",
@@ -319,6 +332,9 @@ const EFFECTS = {
     "pkiller": _EFFECT_INFO["phantasmal-killer"],
     "phantasmal-killer": _EFFECT_INFO["phantasmal-killer"],
     "reduce": _EFFECT_INFO["reduce"],
+    "rb": _EFFECT_INFO["reality-break"],
+    "rbreak": _EFFECT_INFO["reality-break"],
+    "reality-break": _EFFECT_INFO["reality-break"],
     "regen": _EFFECT_INFO["regenerate"],
     "regenerate": _EFFECT_INFO["regenerate"],
     "tcb": _EFFECT_INFO["tashas-caustic-brew"],
@@ -355,7 +371,7 @@ async function handleCommand(chat, parameters, messageData) {
     parameters = parameters.toLowerCase().split(" ");
 
     // If the first parameter corresponds to an effect
-    if(targettedTokens.length > 0 && Object.keys(EFFECTS).includes(parameters[0])) {
+    if(Object.keys(targettedTokens).length > 0 && Object.keys(EFFECTS).includes(parameters[0])) {
         // Get the effect information
         const effectInfo = EFFECTS[parameters[0]];
         // For each token that is selected
