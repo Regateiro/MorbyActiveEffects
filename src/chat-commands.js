@@ -69,7 +69,7 @@ const _EFFECT_INFO = {
     "blood-boil": {
         id: "blood-boil",
         name: "Blood Boil",
-        icon: "icons/magic/fire/flame-burning-eye.webp",
+        icon: "icons/magic/death/skull-weapon-staff-glow-pink.webp",
         commands: "blood-boil | bb",
         changes: [{key: "flags.mae.bloodboil", value: "7d6", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -103,7 +103,7 @@ const _EFFECT_INFO = {
     "ensnaring-strike": {
         id: "ensnaring-strike",
         name: "Ensnaring Strike",
-        icon: "icons/svg/net.svg",
+        icon: "icons/magic/nature/root-vine-hand-strike.webp",
         commands: "ensnaring-strike | es",
         changes: [{key: "flags.mae.estrike", value: "1d6", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -155,7 +155,7 @@ const _EFFECT_INFO = {
     "immolation": {
         id: "immolation",
         name: "Immolation",
-        icon: "icons/magic/fire/flame-burning-creature-skeleton.webp",
+        icon: "icons/magic/death/projectile-skull-fire-orange.webp",
         commands: "immolation | im",
         changes: [{key: "flags.mae.immolation", value: "6d6", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -176,7 +176,7 @@ const _EFFECT_INFO = {
     "killing-winds": {
         id: "killing-winds",
         name: "Killing Winds",
-        icon: "icons/magic/acid/dissolve-bone-skull.webp",
+        icon: "icons/magic/death/projectile-skull-fire-green.webp",
         commands: "killing-winds | kw",
         changes: [{key: "flags.mae.killingwinds", value: "4d12", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -197,7 +197,7 @@ const _EFFECT_INFO = {
     "melfs-acid-arrow": {
         id: "melfs-acid-arrow",
         name: "Melf's Acid Arrow",
-        icon: "icons/svg/acid.svg",
+        icon: "icons/skills/ranged/arrow-gem-flying-poisoned-green.webp",
         commands: "melfs-acid-arrow | acid-arrow | maa",
         changes: [{key: "flags.mae.acidarrow", value: "2d4", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -208,7 +208,7 @@ const _EFFECT_INFO = {
     "phantasmal-killer": {
         id: "phantasmal-killer",
         name: "Phantasmal Killer",
-        icon: "icons/magic/perception/shadow-stealth-eyes-purple.webp",
+        icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/horror-eerie-3.jpg",
         commands: "phantasmal-killer | pkiller | pk",
         changes: [{key: "flags.mae.pkiller", value: "6d10", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -233,7 +233,7 @@ const _EFFECT_INFO = {
     "reality-break": {
         id: "reality-break",
         name: "Reality Break",
-        icon: "icons/svg/regen.svg",
+        icon: "icons/magic/air/wind-tornado-funnel-damage-blue.webp",
         commands: "reality-break | rbreak | rb",
         changes: [
             {key: "flags.mae.rbreak", value: "1", mode: EFFECT_MODE.ADD}
@@ -265,6 +265,17 @@ const _EFFECT_INFO = {
         seconds: 60,
         help: "Damage to apply at the start of turn. Defaults to 2d4.",
         toChatMessage: function (value) { return _toChatMessage("tashas-caustic-brew", "suffering from acid burns and taking", "2d4", "acid damage every turn", value); }
+    },
+    "vitriolic-sphere": {
+        id: "vitriolic-sphere",
+        name: "Vitriolic Sphere",
+        icon: "icons/magic/acid/projectile-smoke-glowing.webp",
+        commands: "vitriolic-sphere | vsphere | vs",
+        changes: [{key: "flags.mae.vsphere", value: "5d4", mode: EFFECT_MODE.ADD}],
+        locked: false,
+        seconds: 60,
+        help: "Damage to apply at the end of turn.",
+        toChatMessage: function (value) { return _toChatMessage("vitriolic-sphere", "suffering from acid burns and taking", "5d4", "acid damage next turn", value); }
     }
 };
 
@@ -340,6 +351,9 @@ const EFFECTS = {
     "tcb": _EFFECT_INFO["tashas-caustic-brew"],
     "caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
     "tashas-caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
+    "vs": _EFFECT_INFO["vitriolic-sphere"],
+    "vsphere": _EFFECT_INFO["vitriolic-sphere"],
+    "vitriolic-sphere": _EFFECT_INFO["vitriolic-sphere"],
 };
 
 /**

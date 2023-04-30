@@ -1,5 +1,8 @@
 import { effectsAPI } from "./morby-active-effects.js";
 
+/**
+ * Triggers waiting for save request resolution
+ */
 let pendingTriggers = {};
 
 /**
@@ -42,6 +45,13 @@ export function handleTurnStartEffects(combat) {
     actor.update(actorUpdates);
 }
 
+/**
+ * Resolves one save request.
+ * @param {*} actorUpdates 
+ * @param {*} tokenId 
+ * @param {*} actorId 
+ * @param {*} timestamp 
+ */
 export function handleSaveResolved(actorUpdates, tokenId, actorId, timestamp) {
     const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
     if (!actorUpdates) {
@@ -72,6 +82,10 @@ export function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.acidarrow) {
         applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
         effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
+    }
+    if(actor.flags?.mae?.vsphere) {
+        applyDamage(actorUpdates, actor, actor.flags.mae.vsphere, "from the Vitriolic Sphere");
+        effectsAPI.removeEffectOnToken(combatant.tokenId, "Vitriolic Sphere");
     }
     if(actor.flags?.mae?.bloodboil) {
         requestSave(combatant, actor, actor.flags.mae.bloodboil, "CON", "Blood Boil");
