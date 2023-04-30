@@ -99,6 +99,9 @@ export function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.pkiller) {
         requestSave(combatant, actor, actor.flags.mae.pkiller, "WIS", "Phantasmal Killer");
     }
+    if(actor.flags?.mae?.vpoison) {
+        requestSave(combatant, actor, actor.flags.mae.vpoison, "CON", "Voracious Poison");
+    }
     if(actor.flags?.mae?.rbreak) {
         requestSave(combatant, actor, "", "WIS", "Reality Break");
     }

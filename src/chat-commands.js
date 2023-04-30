@@ -276,6 +276,16 @@ const _EFFECT_INFO = {
         seconds: 60,
         help: "Damage to apply at the end of turn.",
         toChatMessage: function (value) { return _toChatMessage("vitriolic-sphere", "suffering from acid burns and taking", "5d4", "acid damage next turn", value); }
+    },
+    "voracious-poison": {
+        id: "voracious-poison",
+        name: "Voracious Poison",
+        icon: "icons/magic/acid/dissolve-vomit-green-brown.webp",
+        commands: "voracious-poison | vpoison | vp",
+        changes: [{key: "flags.mae.vpoison", value: "16d8", mode: EFFECT_MODE.ADD}],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function (value) { return _toChatMessage("voracious-poison", "poisoned, taking", "16d8", "poison on a failed CON save each turn", value); }
     }
 };
 
@@ -354,6 +364,9 @@ const EFFECTS = {
     "vs": _EFFECT_INFO["vitriolic-sphere"],
     "vsphere": _EFFECT_INFO["vitriolic-sphere"],
     "vitriolic-sphere": _EFFECT_INFO["vitriolic-sphere"],
+    "vp": _EFFECT_INFO["voracious-poison"],
+    "vpoison": _EFFECT_INFO["voracious-poison"],
+    "voracious-poison": _EFFECT_INFO["voracious-poison"],
 };
 
 /**
