@@ -1,5 +1,5 @@
 import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
-import { handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
+import { handleSaveEffectFailure, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
 export const targettedTokens = {};
@@ -14,8 +14,18 @@ Hooks.once("ready", () => {
         .filter((actor) => !actor.flags?.mae)
         .forEach((actor) => actor.update({"flags.mae": {}}));
     // Bind apply effect buttons to the callback
-    $(document).on('click', '.morby-active-effects', function () { 
+    $(document).on('click', '.mae-apply-effect', function () { 
         applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value')); 
+    });
+    // Bind save success buttons to the callback
+    $(document).on('click', '.mae-save-success', function () {
+        effectsAPI.removeEffectOnToken($(this).data('token-id'), $(this).data('effect-name'));
+        game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+    });
+    // Bind save failure buttons to the callback
+    $(document).on('click', '.mae-save-failure', function () { 
+        handleSaveEffectFailure($(this).data('token-id'), $(this).data('actor-id'), $(this).data('effect-formula'), $(this).data('effect-name'));
+        game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
     });
 });
 
@@ -53,8 +63,10 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
  * Apply spell effects at the start of the turn
  */
 Hooks.on("updateCombat", (combat, turn, diff, userId) => {
-    handleTurnEndEffects(combat); // Previous Turn
-    handleTurnStartEffects(combat); // Current Turn
+    if(game.user.isGM) {
+        handleTurnEndEffects(combat); // Previous Turn
+        handleTurnStartEffects(combat); // Current Turn
+    }
 });
 
 /**
