@@ -143,8 +143,8 @@ function applyDamage(actorUpdates, actor, formula, text) {
  */
 function requestSave(combatant, actor, formula, save, effectName) {
     // Define the apply button for other users
-    const success = `<button class='mae-save-success' data-token-id='${combatant.tokenId}' data-effect-name='${effectName}'><i class="fas fa-hand-holding-magic"></i>Success</button>`;
-    const fail = `<button class='mae-save-failure' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}'><i class="fas fa-hand-holding-magic"></i>Failure</button>`;
+    const success = `<button class='mae-save-success' data-token-id='${combatant.tokenId}' data-effect-name='${effectName}'><i class="fas fa-check"></i>Success</button>`;
+    const fail = `<button class='mae-save-failure' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
     ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
 }
