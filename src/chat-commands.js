@@ -205,6 +205,16 @@ const _EFFECT_INFO = {
         help: "Damage to apply at the end of turn.",
         toChatMessage: function (value) { return _toChatMessage("melfs-acid-arrow", "suffering from acid burns and taking", "2d4", "damage next turn", value); }
     },
+    "phantasmal-killer": {
+        id: "phantasmal-killer",
+        name: "Phantasmal Killer",
+        icon: "icons/magic/perception/shadow-stealth-eyes-purple.webp",
+        commands: "phantasmal-killer | pkiller | pk",
+        changes: [{key: "flags.mae.pkiller", value: "6d10", mode: EFFECT_MODE.ADD}],
+        locked: false,
+        seconds: 60,
+        toChatMessage: function (value) { return _toChatMessage("phantasmal-killer", "facing their deepest fears, taking", "6d10", "psychic damage on a failed WIS save each turn", value); }
+    },
     "reduce": {
         id: "reduce",
         name: "Enlarge/Reduce",
@@ -305,6 +315,9 @@ const EFFECTS = {
     "maa": _EFFECT_INFO["melfs-acid-arrow"],
     "acid-arrow": _EFFECT_INFO["melfs-acid-arrow"],
     "melfs-acid-arrow": _EFFECT_INFO["melfs-acid-arrow"],
+    "pk": _EFFECT_INFO["phantasmal-killer"],
+    "pkiller": _EFFECT_INFO["phantasmal-killer"],
+    "phantasmal-killer": _EFFECT_INFO["phantasmal-killer"],
     "reduce": _EFFECT_INFO["reduce"],
     "regen": _EFFECT_INFO["regenerate"],
     "regenerate": _EFFECT_INFO["regenerate"],
@@ -342,7 +355,7 @@ async function handleCommand(chat, parameters, messageData) {
     parameters = parameters.toLowerCase().split(" ");
 
     // If the first parameter corresponds to an effect
-    if(Object.keys(EFFECTS).includes(parameters[0])) {
+    if(targettedTokens.length > 0 && Object.keys(EFFECTS).includes(parameters[0])) {
         // Get the effect information
         const effectInfo = EFFECTS[parameters[0]];
         // For each token that is selected

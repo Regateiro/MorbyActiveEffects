@@ -57,6 +57,9 @@ export function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.killingwinds) {
         requestSave(combatant, actor, actor.flags.mae.killingwinds, "CON", "Killing Winds");
     }
+    if(actor.flags?.mae?.pkiller) {
+        requestSave(combatant, actor, actor.flags.mae.pkiller, "WIS", "Phantasmal Killer");
+    }
 
     actor.update(actorUpdates);
 }

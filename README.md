@@ -27,6 +27,7 @@ The list of supported effects/conditions is shown in the table below.
 | Killing Winds        | +4d12 damage at the end of turn on failed save | No                     | /mae killing-winds             | kw                |
 | Lacerated            | +X damage at the start of turn                 | Yes (0)                | /mae lacerated  \<X\>          | lace              |
 | Melf's Acid Arrow    | +X damage at the end of turn                   | Yes (2d4)              | /mae melfs-acid-arrow  \<X\>   | acid-arrow, maa   |
+| Phantasmal Killer    | +X damage at the end of turn on failed save    | Yes (6d10)             | /mae phantasmal-killer \<X\>   | pkiller, pk       |
 | Reduce               | -1d4 to weapon damage - token size             | No                     | /mae reduce                    |                   |
 | Regenerate           | +X healing at the start of turn                | Yes (10)               | /mae regenerate  \<X\>         | regen             |
 | Tasha's Caustic Brew | +X damage at the start of turn                 | Yes (2d4)              | /mae tashas-caustic-brew \<X\> | caustic-brew, tcb |
