@@ -13,22 +13,20 @@ export function handleTurnStartEffects(combat) {
         "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
     };
 
-    if(game.user.isGM) {
-        if(actor.flags?.mae?.heroismTempHP) {
-            applyHP(actorUpdates, actor, true, actor.flags.mae.heroismTempHP, "from Heroism");
-        }
-        if(actor.flags?.mae?.lacerated) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "from the lacerated condition");
-        }
-        if(actor.flags?.mae?.estrike) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "from the Ensnaring Strike");
-        }
-        if(actor.flags?.mae?.causticbrew) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
-        }
-        if(actor.flags?.mae?.regenerate) {
-            applyHP(actorUpdates, actor, false, actor.flags.mae.regenerate, "from Regenerate");
-        }
+    if(actor.flags?.mae?.heroismTempHP) {
+        applyHP(actorUpdates, actor, true, actor.flags.mae.heroismTempHP, "from Heroism");
+    }
+    if(actor.flags?.mae?.lacerated) {
+        applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "from the lacerated condition");
+    }
+    if(actor.flags?.mae?.estrike) {
+        applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "from the Ensnaring Strike");
+    }
+    if(actor.flags?.mae?.causticbrew) {
+        applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
+    }
+    if(actor.flags?.mae?.regenerate) {
+        applyHP(actorUpdates, actor, false, actor.flags.mae.regenerate, "from Regenerate");
     }
 
     actor.update(actorUpdates);
@@ -43,16 +41,34 @@ export function handleTurnEndEffects(combat) {
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     let actorUpdates = {};
 
-    if(game.user.isGM) {
-        if(actor.flags?.mae?.idinsinuation) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "from the Id Insinuation");
-        }
-        if(actor.flags?.mae?.acidarrow) {
-            applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
-            effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
-        }
+    if(actor.flags?.mae?.idinsinuation) {
+        applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "from the Id Insinuation");
+    }
+    if(actor.flags?.mae?.acidarrow) {
+        applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
+        effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
+    }
+    if(actor.flags?.mae?.bloodboil) {
+        requestSave(combatant, actor, actor.flags.mae.bloodboil, "CON", "Blood Boil");
     }
 
+    actor.update(actorUpdates);
+}
+
+/**
+ * Process all applicable turn end effects and begin processing
+ * @param {Combat} combat 
+ */
+export function handleSaveEffectFailure(tokenId, actorId, formula, effectName) {
+    const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
+
+    let actorUpdates = {
+        "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
+        "system.attributes.hp.max": Number(actor.system.attributes.hp.max),
+        "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
+    };
+
+    applyDamage(actorUpdates, actor, formula, `from the ${effectName}`);
     actor.update(actorUpdates);
 }
 
@@ -119,4 +135,16 @@ function applyDamage(actorUpdates, actor, formula, text) {
         flavor: `${actor.name} suffers ${roll.total} points of damage ${text}!`,
         speaker: ChatMessage.getSpeaker({actor: actor, token: actor.token})
     });
+}
+
+/**
+ * Apply lacerated effect damage to the actor.
+ * @param {Actor5e} combatant 
+ */
+function requestSave(combatant, actor, formula, save, effectName) {
+    // Define the apply button for other users
+    const success = `<button class='mae-save-success' data-token-id='${combatant.tokenId}' data-effect-name='${effectName}'><i class="fas fa-hand-holding-magic"></i>Success</button>`;
+    const fail = `<button class='mae-save-failure' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}'><i class="fas fa-hand-holding-magic"></i>Failure</button>`;
+    // Print the message
+    ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
 }
