@@ -22,6 +22,7 @@ The list of supported effects/conditions is shown in the table below.
 | Guidance             | +1d4 to skill checks                          | No                     | /mae guidance                  |                   |
 | Heroism              | X temp HP at the start of turn                | Yes (0)                | /mae heroism \<X\>             |                   |
 | Id Insinuation       | +1d12 damage at the end of turn               | No                     | /mae id-insinuation            | ii                |
+| Immolation           | +6d6 damage at the end of turn on failed save | No                     | /mae immolation                |                   |
 | Initiative Bonus     | +X to the next initiative roll                | Yes (1d8)              | /mae initiative-bonus \<X\>    | init-bonus, ib    |
 | Lacerated            | +X damage at the start of turn                | Yes (0)                | /mae lacerated  \<X\>          | lace              |
 | Melf's Acid Arrow    | +X damage at the end of turn                  | Yes (2d4)              | /mae melfs-acid-arrow  \<X\>   | acid-arrow, maa   |

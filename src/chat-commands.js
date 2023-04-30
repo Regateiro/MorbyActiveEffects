@@ -46,7 +46,7 @@ const _EFFECT_INFO = {
     "barkskin": {
         id: "barkskin",
         name: "Barkskin",
-        icon: "icons/svg/aura.svg",
+        icon: "icons/magic/nature/barrier-shield-wood-vines.webp",
         commands: "barkskin",
         changes: [{key: "system.attributes.ac.value", value: "16", mode: EFFECT_MODE.UPGRADE}],
         locked: true,
@@ -69,7 +69,7 @@ const _EFFECT_INFO = {
     "blood-boil": {
         id: "blood-boil",
         name: "Blood Boil",
-        icon: "icons/svg/angel.svg",
+        icon: "icons/magic/fire/flame-burning-eye.webp",
         commands: "blood-boil | bb",
         changes: [{key: "flags.mae.bloodboil", value: "7d6", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -151,6 +151,16 @@ const _EFFECT_INFO = {
         locked: true,
         seconds: 60,
         toChatMessage: function (value) { return _toChatMessage("id-insinuation", "suffering from conflicting desires, taking", "1d12", "psychic damage every turn", value); }
+    },
+    "immolation": {
+        id: "immolation",
+        name: "Immolation",
+        icon: "icons/magic/fire/flame-burning-creature-skeleton.webp",
+        commands: "immolation",
+        changes: [{key: "flags.mae.immolation", value: "6d6", mode: EFFECT_MODE.ADD}],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function (value) { return _toChatMessage("immolation", "wreathed in flames, taking", "6d6", "fire damage on a failed DEX save each turn", value); }
     },
     "initiative-bonus": {
         id: "initiative-bonus",
@@ -272,6 +282,7 @@ const EFFECTS = {
     "heroism": _EFFECT_INFO["heroism"],
     "ii": _EFFECT_INFO["id-insinuation"],
     "id-insinuation": _EFFECT_INFO["id-insinuation"],
+    "immolation": _EFFECT_INFO["immolation"],
     "ib": _EFFECT_INFO["initiative-bonus"],
     "init-bonus": _EFFECT_INFO["initiative-bonus"],
     "initiative-bonus": _EFFECT_INFO["initiative-bonus"],

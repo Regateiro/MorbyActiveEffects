@@ -51,6 +51,9 @@ export function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.bloodboil) {
         requestSave(combatant, actor, actor.flags.mae.bloodboil, "CON", "Blood Boil");
     }
+    if(actor.flags?.mae?.immolation) {
+        requestSave(combatant, actor, actor.flags.mae.immolation, "DEX", "Immolation");
+    }
 
     actor.update(actorUpdates);
 }
