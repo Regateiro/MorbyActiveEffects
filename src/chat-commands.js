@@ -1,5 +1,5 @@
 import { EFFECTS } from "./effect-data.js";
-import { targettedTokens, effectsAPI } from "./morby-active-effects.js";
+import { targetedTokens, effectsAPI } from "./morby-active-effects.js";
 
 /**
  * Register the mae command with Foundry
@@ -30,7 +30,7 @@ async function handleCommand(chat, parameters, messageData) {
     parameters = parameters.toLowerCase().split(" ");
 
     // If the first parameter corresponds to an effect
-    if(Object.keys(targettedTokens).length > 0 && Object.keys(EFFECTS).includes(parameters[0])) {
+    if(Object.keys(targetedTokens).length > 0 && Object.keys(EFFECTS).includes(parameters[0])) {
         // Get the effect information
         const effectInfo = EFFECTS[parameters[0]];
         // For each token that is selected
@@ -43,7 +43,7 @@ async function handleCommand(chat, parameters, messageData) {
             // Get the effect information
             const effectInfo = EFFECTS[parameters[1]];
             // For each token that is selected
-            for (const token of Object.values(targettedTokens)) {
+            for (const token of Object.values(targetedTokens)) {
                 // Remove any effect with the same name
                 await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
             };
@@ -55,7 +55,7 @@ async function handleCommand(chat, parameters, messageData) {
 
 export async function applyEffectToAllTargets(effectId, value) {
     const effectInfo = EFFECTS[effectId];
-    for (const token of Object.values(targettedTokens)) {
+    for (const token of Object.values(targetedTokens)) {
         // Remove any effect with the same name
         await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
         // Create a new effect

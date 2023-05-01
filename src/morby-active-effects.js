@@ -2,7 +2,7 @@ import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
 import { applyDamage, generateActorUpdates, handleResolvedSaveRequest, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
-export const targettedTokens = {};
+export const targetedTokens = {};
 
 /**
  * One time registration steps for settings and core function overrides.
@@ -114,12 +114,12 @@ Hooks.on("updateCombat", (combat, turn, diff, userId) => {
 });
 
 /**
- * Keep track of which token is being controlled
+ * Keep track of which token is being targeted
  */
-Hooks.on("targetToken", (user, token, targetted) => {
-    if(targetted) {
-        targettedTokens[token.id] = token;
+Hooks.on("targetToken", (user, token, targeted) => {
+    if(targeted) {
+        targetedTokens[token.id] = token;
     } else {
-        delete targettedTokens[token.id];
+        delete targetedTokens[token.id];
     };
 });

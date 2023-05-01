@@ -1,4 +1,4 @@
-import { targettedTokens } from "./morby-active-effects.js";
+import { targetedTokens } from "./morby-active-effects.js";
 
 /**
  * List of effect modes
@@ -375,10 +375,10 @@ export const EFFECTS = {
  */
 function _toChatMessage(effectId, preText, effectValue, postText, value) {
     // Join the token names and select the target verb
-    let targets = Object.values(targettedTokens).map(t => t.name).join(", ");
+    let targets = Object.values(targetedTokens).map(t => t.name).join(", ");
     let targetVerb = "is";
     // Fix the last comma into an 'and' if there are more than 1 token and update the verb
-    if(Object.values(targettedTokens).length > 1) {
+    if(Object.values(targetedTokens).length > 1) {
         var pos = targets.lastIndexOf(',');
         targets = targets.substring(0, pos) + " and " + targets.substring(pos + 1);
         targetVerb = "are";
