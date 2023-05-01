@@ -34,6 +34,10 @@ export async function handleTurnStartEffects(combat) {
     if(actor.flags?.mae?.confusion) {
         await handleConfusion(combatant._id);
     };
+    if(actor.flags?.mae?.searingsmite) {
+        saveRequests += 1;
+        await requestSave(combatant._id, actor.flags.mae.searingsmite, "CON", "Searing Smite", timestamp);
+    };
     if(actor.flags?.mae?.regenerate) {
         if(saveRequests == 0) {
             await applyHP(actorUpdates, combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
@@ -171,7 +175,7 @@ export async function applyDamage(actorUpdates, combatantId, formula, effectName
     const tempHP = actorUpdates["system.attributes.hp.temp"];
     const newTempHP = Math.max(tempHP - damage, 0);
     const HP = actorUpdates["system.attributes.hp.value"];
-    const newHP = HP - Math.max(damage - tempHP, 0);
+    const newHP = Math.max(HP - Math.max(damage - tempHP, 0), 0);
 
     // Warn if the HP reached 0
     let extraText = "";
@@ -198,11 +202,11 @@ export async function applyDamage(actorUpdates, combatantId, formula, effectName
  * @param {String} formula The formula to calculate the HP restored from
  * @param {String} save The save to requests (STR, CON, DEX, INT, WIS, CHA)
  * @param {String} effectName The name of the effect triggering this save request
+ * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
  * @param {Boolean} removeOnSave Whether the effect should be removed on a successful save
  * @param {Boolean} halfDamage Whether the combatant still takes half damage on a successful save
- * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
  */
-async function requestSave(combatantId, formula, save, effectName, removeOnSave = true, halfDamage = false, timestamp) {
+async function requestSave(combatantId, formula, save, effectName, timestamp, removeOnSave = true, halfDamage = false) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     // Define the apply button for other users
@@ -241,7 +245,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${actor.name} is swallowed by a Rending Rift!`
             });
-            await requestSave(combatantId, "8d12", "DEX", "Reality Break's Rending Rift", false, true, timestamp);
+            await requestSave(combatantId, "8d12", "DEX", "Reality Break's Rending Rift", timestamp, false, true);
             return 1;
         case 6:
         case 7:

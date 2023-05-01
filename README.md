@@ -31,6 +31,7 @@ The list of supported effects/conditions is shown in the table below.
 | Reality Break        | +6\|8\|10d12 damage at the end of turn          | No                     | /mae reality-break             | rbreak, rb        |
 | Reduce               | -1d4 to weapon damage - token size              | No                     | /mae reduce                    |                   |
 | Regenerate           | +X healing at the start of turn                 | Yes (10)               | /mae regenerate \<X\>          | regen             |
+| Searing Smite        | +1d6 damage at the start of turn on failed save | No                     | /mae searing-smite             | sm                |
 | Tasha's Caustic Brew | +X damage at the start of turn                  | Yes (2d4)              | /mae tashas-caustic-brew \<X\> | caustic-brew, tcb |
 | Vitriolic Sphere     | +X damage at the end of turn                    | Yes (5d4)              | /mae vitriolic-sphere \<X\>    | vsphere, vs       |
 | Voracious Poison     | +16d8 damage at the end of turn on failed save  | No                     | /mae voracious-poison          | vpoison, vp       |

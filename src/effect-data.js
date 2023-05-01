@@ -251,6 +251,16 @@ const _EFFECT_INFO = {
         help: "Health to be regenerated. Defaults to 10.",
         toChatMessage: function (value) { return _toChatMessage("regenerate", `regenerating ${value || "10"} HP every turn`, value); }
     },
+    "searing-smite": {
+        id: "searing-smite",
+        name: "Searing Smite",
+        icon: "icons/magic/fire/dagger-rune-enchant-flame-red.webp",
+        commands: "searing-smite | sm",
+        changes: [{key: "flags.mae.searingsmite", value: "1d6", mode: EFFECT_MODE.ADD}],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function () { return _toChatMessage("searing-smite", `engulfed in flames, taking 1d6 fire damage on a failed CON save each turn`); }
+    },
     "tashas-caustic-brew": {
         id: "tashas-caustic-brew",
         name: "Tasha's Caustic Brew",
@@ -338,6 +348,8 @@ export const EFFECTS = {
     "reality-break": _EFFECT_INFO["reality-break"],
     "regen": _EFFECT_INFO["regenerate"],
     "regenerate": _EFFECT_INFO["regenerate"],
+    "sm": _EFFECT_INFO["searing-smite"],
+    "searing-smite": _EFFECT_INFO["searing-smite"],
     "tcb": _EFFECT_INFO["tashas-caustic-brew"],
     "caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
     "tashas-caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
