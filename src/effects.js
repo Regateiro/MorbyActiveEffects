@@ -12,58 +12,36 @@ let pendingTriggers = {};
 export function handleTurnStartEffects(combat) {
     const combatant = combat.combatants.get(combat.current.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = generateActorUpdates(actor);
+    let actorUpdates = generateActorUpdates(combatant._id);
 
     let saveRequests = 0;
     const timestamp = String(Date.now());
     if(actor.flags?.mae?.heroismTempHP) {
-        applyHP(actorUpdates, actor, true, actor.flags.mae.heroismTempHP, "from Heroism");
+        applyHP(actorUpdates, combatant._id, true, actor.flags.mae.heroismTempHP, "from Heroism");
     }
     if(actor.flags?.mae?.lacerated) {
-        applyDamage(actorUpdates, actor, actor.flags.mae.lacerated, "from the lacerated condition");
+        applyDamage(actorUpdates, combatant._id, actor.flags.mae.lacerated, "from the lacerated condition");
     }
     if(actor.flags?.mae?.estrike) {
-        applyDamage(actorUpdates, actor, actor.flags.mae.estrike, "from the Ensnaring Strike");
+        applyDamage(actorUpdates, combatant._id, actor.flags.mae.estrike, "from the Ensnaring Strike");
     }
     if(actor.flags?.mae?.causticbrew) {
-        applyDamage(actorUpdates, actor, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
+        applyDamage(actorUpdates, combatant._id, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
     }
     if(actor.flags?.mae?.rbreak) {
-        saveRequests += handleRealityBreak(actorUpdates, combatant, actor, timestamp);
+        saveRequests += handleRealityBreak(actorUpdates, combatant._id, timestamp);
     }
     if(actor.flags?.mae?.regenerate) {
         if(saveRequests == 0) {
-            applyHP(actorUpdates, actor, false, actor.flags.mae.regenerate, "from Regenerate");
+            applyHP(actorUpdates, combatant._id, false, actor.flags.mae.regenerate, "from Regenerate");
         } else {
             pendingTriggers[timestamp] = {
                 "saveRequests": saveRequests,
-                "trigger": function(au) { applyCombatantHP(au, combatant._id, false, actor.flags.mae.regenerate, "from Regenerate") }
+                "trigger": function(au) { applyHP(au, combatant._id, false, actor.flags.mae.regenerate, "from Regenerate") }
             };
         }
     }
 
-    actor.update(actorUpdates);
-}
-
-/**
- * Resolves one save request.
- * @param {*} actorUpdates 
- * @param {*} tokenId 
- * @param {*} actorId 
- * @param {*} timestamp 
- */
-export function handleSaveResolved(actorUpdates, tokenId, actorId, timestamp) {
-    const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
-    if (!actorUpdates) {
-        actorUpdates = generateActorUpdates(actor);
-    }
-    if (pendingTriggers[timestamp]) {
-        pendingTriggers[timestamp]["saveRequests"] = pendingTriggers[timestamp]["saveRequests"] - 1;
-        if (pendingTriggers[timestamp]["saveRequests"] == 0) {
-            pendingTriggers[timestamp]["trigger"](actorUpdates);
-            delete pendingTriggers[timestamp];
-        }
-    }
     actor.update(actorUpdates);
 }
 
@@ -77,56 +55,49 @@ export function handleTurnEndEffects(combat) {
     let actorUpdates = {};
 
     if(actor.flags?.mae?.idinsinuation) {
-        applyDamage(actorUpdates, actor, actor.flags.mae.idinsinuation, "from the Id Insinuation");
+        applyDamage(actorUpdates, combatant._id, actor.flags.mae.idinsinuation, "from the Id Insinuation");
     }
     if(actor.flags?.mae?.acidarrow) {
-        applyDamage(actorUpdates, actor, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
+        applyDamage(actorUpdates, combatant._id, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
         effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
     }
     if(actor.flags?.mae?.vsphere) {
-        applyDamage(actorUpdates, actor, actor.flags.mae.vsphere, "from the Vitriolic Sphere");
+        applyDamage(actorUpdates, combatant._id, actor.flags.mae.vsphere, "from the Vitriolic Sphere");
         effectsAPI.removeEffectOnToken(combatant.tokenId, "Vitriolic Sphere");
     }
     if(actor.flags?.mae?.bloodboil) {
-        requestSave(combatant, actor, actor.flags.mae.bloodboil, "CON", "Blood Boil");
+        requestSave(combatant._id, actor.flags.mae.bloodboil, "CON", "Blood Boil");
     }
     if(actor.flags?.mae?.immolation) {
-        requestSave(combatant, actor, actor.flags.mae.immolation, "DEX", "Immolation");
+        requestSave(combatant._id, actor.flags.mae.immolation, "DEX", "Immolation");
     }
     if(actor.flags?.mae?.killingwinds) {
-        requestSave(combatant, actor, actor.flags.mae.killingwinds, "CON", "Killing Winds");
+        requestSave(combatant._id, actor.flags.mae.killingwinds, "CON", "Killing Winds");
     }
     if(actor.flags?.mae?.pkiller) {
-        requestSave(combatant, actor, actor.flags.mae.pkiller, "WIS", "Phantasmal Killer");
+        requestSave(combatant._id, actor.flags.mae.pkiller, "WIS", "Phantasmal Killer");
     }
     if(actor.flags?.mae?.vpoison) {
-        requestSave(combatant, actor, actor.flags.mae.vpoison, "CON", "Voracious Poison");
+        requestSave(combatant._id, actor.flags.mae.vpoison, "CON", "Voracious Poison");
     }
     if(actor.flags?.mae?.weird) {
-        requestSave(combatant, actor, actor.flags.mae.weird, "WIS", "Weird");
+        requestSave(combatant._id, actor.flags.mae.weird, "WIS", "Weird");
     }
     if(actor.flags?.mae?.rbreak) {
-        requestSave(combatant, actor, "", "WIS", "Reality Break");
+        requestSave(combatant._id, "", "WIS", "Reality Break");
     }
 
     actor.update(actorUpdates);
 }
 
 /**
- * Process all applicable turn end effects and begin processing
- * @param {Combat} combat 
+ * Generates a new actorUpdates variable from a combatant
+ * @param {*} combatantId 
+ * @returns 
  */
-export function handleSaveEffectDamage(tokenId, actorId, formula, effectName, halfDamage) {
-    if (!formula) return;
-
-    const actor = game.actors.tokens[tokenId] || game.actors.get(actorId);
-    let actorUpdates = generateActorUpdates(actor);
-
-    applyDamage(actorUpdates, actor, formula, `from the ${effectName}`, halfDamage);
-    return actorUpdates;
-}
-
-function generateActorUpdates(actor) {
+export function generateActorUpdates(combatantId) {
+    const combatant = game.combat.combatants.get(combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     return {
         "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
         "system.attributes.hp.max": Number(actor.system.attributes.hp.max),
@@ -138,7 +109,9 @@ function generateActorUpdates(actor) {
  * Apply heroism spell effect to the actor.
  * @param {Actor5e} actor 
  */
-function applyHP(actorUpdates, actor, isTemporary, formula, text) {
+function applyHP(actorUpdates, combatantId, isTemporary, formula, text) {
+    const combatant = game.combat.combatants.get(combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     const roll = new Roll(String(formula));
     roll.evaluate({async: false});
 
@@ -164,20 +137,14 @@ function applyHP(actorUpdates, actor, isTemporary, formula, text) {
 }
 
 /**
- * Apply heroism spell effect to the actor.
- * @param {Actor5e} actor 
- */
-function applyCombatantHP(actorUpdates, combatantId, isTemporary, formula, text) {
-    const combatant = game.combat.combatants.get(combatantId);
-    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    applyHP(actorUpdates, actor, isTemporary, formula, text);
-}
-
-/**
  * Apply lacerated effect damage to the actor.
  * @param {Actor5e} actor 
  */
-function applyDamage(actorUpdates, actor, formula, text, halfDamage = false) {
+export function applyDamage(actorUpdates, combatantId, formula, text, halfDamage = false) {
+    if (!formula) return;
+
+    const combatant = game.combat.combatants.get(combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     const roll = new Roll(String(formula));
     roll.evaluate({async: false});
 
@@ -214,15 +181,19 @@ function applyDamage(actorUpdates, actor, formula, text, halfDamage = false) {
  * Apply lacerated effect damage to the actor.
  * @param {Actor5e} combatant 
  */
-function requestSave(combatant, actor, formula, save, effectName, removeOnSave = true, halfDamage = false, timestamp) {
+function requestSave(combatantId, formula, save, effectName, removeOnSave = true, halfDamage = false, timestamp) {
+    const combatant = game.combat.combatants.get(combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     // Define the apply button for other users
-    const success = `<button class='mae-save-success' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
-    const fail = `<button class='mae-save-failure' data-token-id='${combatant.tokenId}' data-actor-id='${combatant.actorId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
+    const success = `<button class='mae-save-success' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
+    const fail = `<button class='mae-save-failure' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
     ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
 }
 
-function handleRealityBreak(actorUpdates, combatant, actor, timestamp) {
+function handleRealityBreak(actorUpdates, combatantId, timestamp) {
+    const combatant = game.combat.combatants.get(combatantId);
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     const roll = new Roll("1d10");
     roll.evaluate({async: false});
 
@@ -233,7 +204,7 @@ function handleRealityBreak(actorUpdates, combatant, actor, timestamp) {
             roll.toMessage({ sound: null, speaker: null,
                 flavor: `${actor.name} is sees a Vision of the Far Realm from Reality Break and is <b>stunned</b> until the end of the turn!`
             });
-            applyDamage(actorUpdates, actor, "6d12", "from Reality Break's Vision of the Far Realm");
+            applyDamage(actorUpdates, combatantId, "6d12", "from Reality Break's Vision of the Far Realm");
             return 0;
         case 3:
         case 4:
@@ -242,7 +213,7 @@ function handleRealityBreak(actorUpdates, combatant, actor, timestamp) {
             roll.toMessage({ sound: null, speaker: null,
                 flavor: `${actor.name} is swallowed by a Rending Rift from Reality Break!`
             });
-            requestSave(combatant, actor, "8d12", "DEX", "Reality Break's Rending Rift", false, true, timestamp);
+            requestSave(combatantId, "8d12", "DEX", "Reality Break's Rending Rift", false, true, timestamp);
             return 1;
         case 6:
         case 7:
@@ -251,7 +222,7 @@ function handleRealityBreak(actorUpdates, combatant, actor, timestamp) {
             roll.toMessage({ sound: null, speaker: null,
                 flavor: `${actor.name} teleports up to 30 feet through a wormhole from Reality Break and is knocked <b>prone</b>!`
             });
-            applyDamage(actorUpdates, actor, "10d12", "from Reality Break's Wormhole");
+            applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Wormhole");
             return 0;
         case 9:
         case 10:
@@ -259,7 +230,29 @@ function handleRealityBreak(actorUpdates, combatant, actor, timestamp) {
             roll.toMessage({ sound: null, speaker: null,
                 flavor: `${actor.name} chilled by the Dark Void from Reality Break and is <b>blinded</b> until the end of the turn!`
             });
-            applyDamage(actorUpdates, actor, "10d12", "from Reality Break's Dark Void");
+            applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Dark Void");
     }
     return 0;
+}
+
+/**
+ * Resolves one save request.
+ * @param {*} actorUpdates 
+ * @param {*} tokenId 
+ * @param {*} actorId 
+ * @param {*} timestamp 
+ */
+export function handleResolvedSaveRequest(actorUpdates, timestamp) {
+    // If there are any pending triggers on this timestamp
+    if (pendingTriggers[timestamp]) {
+        // Decrements the number of save requests the triggers are waiting on
+        pendingTriggers[timestamp]["saveRequests"] = pendingTriggers[timestamp]["saveRequests"] - 1;
+        // If the last save request has been resolved
+        if (pendingTriggers[timestamp]["saveRequests"] == 0) {
+            // Call the trigger
+            pendingTriggers[timestamp]["trigger"](actorUpdates);
+            // Delete the pending trigger information
+            delete pendingTriggers[timestamp];
+        }
+    }
 }

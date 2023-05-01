@@ -1,5 +1,5 @@
 import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
-import { handleSaveEffectDamage, handleSaveResolved, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
+import { applyDamage, generateActorUpdates, handleResolvedSaveRequest, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
 export const targettedTokens = {};
@@ -14,22 +14,59 @@ Hooks.once("ready", () => {
         .filter((actor) => !actor.flags?.mae)
         .forEach((actor) => actor.update({"flags.mae": {}}));
     // Bind apply effect buttons to the callback
-    $(document).on('click', '.mae-apply-effect', function () { 
-        applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value')); 
+    $(document).on('click', '.mae-apply-effect', function () {
+        applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value'));
     });
     // Bind save success buttons to the callback
     $(document).on('click', '.mae-save-success', function () {
-        let actorUpgrades = null;
-        if (Boolean($(this).data('remove'))) effectsAPI.removeEffectOnToken($(this).data('token-id'), $(this).data('effect-name'));
-        if (Boolean($(this).data('half-damage'))) actorUpgrades = handleSaveEffectDamage($(this).data('token-id'), $(this).data('actor-id'), $(this).data('effect-formula'), $(this).data('effect-name'), true);
+        const combatant = game.combat.combatants.get($(this).data('combatant-id'));
+        const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+        const actorUpgrades = generateActorUpdates(combatant._id);
+        const formula = $(this).data('effect-formula');
+        const effectName = $(this).data('effect-name');
+        const removeEffect = Boolean($(this).data('remove'));
+        const halfDamage = Boolean($(this).data('half-damage'));
+        const timestamp = $(this).data('timestamp');
+
+        // If the effect is to be removed on a successful save, do it
+        if (removeEffect) {
+            effectsAPI.removeEffectOnToken(combatant.tokenId, effectName);
+        }
+
+        // If the target still takes half damage on a successful save, apply the damage
+        if (halfDamage) {
+            applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, true);
+        }
+
+        // Handle a save request resolution
+        handleResolvedSaveRequest(actorUpgrades, timestamp);
+
+        // Update the actor
+        actor.update(actorUpgrades);
+
+        // Delete the chat message with the save request as it is no longer needed
         game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
-        handleSaveResolved(actorUpgrades, $(this).data('token-id'), $(this).data('actor-id'), $(this).data('timestamp'));
     });
     // Bind save failure buttons to the callback
-    $(document).on('click', '.mae-save-failure', function () { 
-        let actorUpgrades = handleSaveEffectDamage($(this).data('token-id'), $(this).data('actor-id'), $(this).data('effect-formula'), $(this).data('effect-name'), false);
+    $(document).on('click', '.mae-save-failure', function () {
+        const combatant = game.combat.combatants.get($(this).data('combatant-id'));
+        const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+        const actorUpgrades = generateActorUpdates(combatant._id);
+        const formula = $(this).data('effect-formula');
+        const effectName = $(this).data('effect-name');
+        const timestamp = $(this).data('timestamp');
+
+        // Apply effect damage
+        applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, false);
+
+        // Handle a save request resolution
+        handleResolvedSaveRequest(actorUpgrades, timestamp);
+
+        // Update the actor
+        actor.update(actorUpgrades);
+
+        // Delete the chat message with the save request as it is no longer needed
         game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
-        handleSaveResolved(actorUpgrades, $(this).data('token-id'), $(this).data('actor-id'), $(this).data('timestamp'));
     });
 });
 
