@@ -55,7 +55,7 @@ export async function handleTurnStartEffects(combat) {
 export async function handleTurnEndEffects(combat) {
     const combatant = combat.combatants.get(combat.previous.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = {};
+    let actorUpdates = await generateActorUpdates(combatant._id);
 
     if(actor.flags?.mae?.idinsinuation) {
         await applyDamage(actorUpdates, combatant._id, actor.flags.mae.idinsinuation, "Id Insinuation");
