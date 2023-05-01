@@ -7,7 +7,7 @@ let pendingTriggers = {};
 
 /**
  * Process all applicable turn start effects and begin processing
- * @param {Combat} combat 
+ * @param {Combat} combat Foundry combat data
  */
 export async function handleTurnStartEffects(combat) {
     const combatant = combat.combatants.get(combat.current.combatantId);
@@ -17,16 +17,16 @@ export async function handleTurnStartEffects(combat) {
     let saveRequests = 0;
     const timestamp = String(Date.now());
     if(actor.flags?.mae?.heroismTempHP) {
-        await applyHP(actorUpdates, combatant._id, true, actor.flags.mae.heroismTempHP, "from Heroism");
+        await applyHP(actorUpdates, combatant._id, true, actor.flags.mae.heroismTempHP, "Heroism");
     };
     if(actor.flags?.mae?.lacerated) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.lacerated, "from the lacerated condition");
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.lacerated, "being lacerated");
     };
     if(actor.flags?.mae?.estrike) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.estrike, "from the Ensnaring Strike");
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.estrike, "Ensnaring Strike");
     };
     if(actor.flags?.mae?.causticbrew) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.causticbrew, "from the Tasha's Caustic Brew");
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.causticbrew, "Tasha's Caustic Brew");
     };
     if(actor.flags?.mae?.rbreak) {
         saveRequests += await handleRealityBreak(actorUpdates, combatant._id, timestamp);
@@ -36,11 +36,11 @@ export async function handleTurnStartEffects(combat) {
     };
     if(actor.flags?.mae?.regenerate) {
         if(saveRequests == 0) {
-            await applyHP(actorUpdates, combatant._id, false, actor.flags.mae.regenerate, "from Regenerate");
+            await applyHP(actorUpdates, combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
         } else {
             pendingTriggers[timestamp] = {
                 "saveRequests": saveRequests,
-                "trigger": async function(au) { await applyHP(au, combatant._id, false, actor.flags.mae.regenerate, "from Regenerate"); }
+                "trigger": async function(au) { await applyHP(au, combatant._id, false, actor.flags.mae.regenerate, "Regenerate"); }
             };
         };
     };
@@ -50,7 +50,7 @@ export async function handleTurnStartEffects(combat) {
 
 /**
  * Process all applicable turn end effects and begin processing
- * @param {Combat} combat 
+ * @param {Combat} combat Foundry combat data
  */
 export async function handleTurnEndEffects(combat) {
     const combatant = combat.combatants.get(combat.previous.combatantId);
@@ -58,14 +58,14 @@ export async function handleTurnEndEffects(combat) {
     let actorUpdates = {};
 
     if(actor.flags?.mae?.idinsinuation) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.idinsinuation, "from the Id Insinuation");
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.idinsinuation, "Id Insinuation");
     };
     if(actor.flags?.mae?.acidarrow) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.acidarrow, "from the Melf's Acid Arrow");
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.acidarrow, "Melf's Acid Arrow");
         await effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
     };
     if(actor.flags?.mae?.vsphere) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.vsphere, "from the Vitriolic Sphere");
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.vsphere, "Vitriolic Sphere");
         await effectsAPI.removeEffectOnToken(combatant.tokenId, "Vitriolic Sphere");
     };
     if(actor.flags?.mae?.bloodboil) {
@@ -98,8 +98,8 @@ export async function handleTurnEndEffects(combat) {
 
 /**
  * Generates a new actorUpdates variable from a combatant
- * @param {*} combatantId 
- * @returns 
+ * @param {String} combatantId The id of the combatant
+ * @returns An object with current actor values
  */
 export async function generateActorUpdates(combatantId) {
     const combatant = game.combat.combatants.get(combatantId);
@@ -112,23 +112,28 @@ export async function generateActorUpdates(combatantId) {
 };
 
 /**
- * Apply heroism spell effect to the actor.
- * @param {Actor5e} actor 
+ * Apply HP to the actor.
+ * @param {Object} actorUpdates An object with the current HP values of the actor
+ * @param {String} combatantId The id of the combatant
+ * @param {Boolean} isTemporary Whether the HP to be applied is temporary or not
+ * @param {String} formula The formula to calculate the HP restored from
+ * @param {String} effectName The name of the effect triggering this HP recovery
  */
-async function applyHP(actorUpdates, combatantId, isTemporary, formula, text) {
+async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectName) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     const roll = new Roll(String(formula));
     await roll.evaluate({async: true});
 
+    let extraText = "";
     if (isTemporary) {
-        // Apply tempHP if it is higher than the current amount
+        // Apply tempHP if it is higher than the current amount TODO: Armor Masteries support
         if(actorUpdates["system.attributes.hp.temp"] < roll.total) {
             actorUpdates["system.attributes.hp.temp"] = roll.total;
         }
     } else {
         if (actorUpdates["system.attributes.hp.value"] == 0 && roll.total > 0) {
-            text = `${text} while at 0HP and is <b>no longer dying</b>`;
+            extraText = ` while at 0HP and is <b>no longer dying</b>`;
         }
         actorUpdates["system.attributes.hp.value"] = Math.min(
             actorUpdates["system.attributes.hp.value"] + roll.total, 
@@ -137,16 +142,20 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, text) {
     };
 
     // Display Chat Message
-    roll.toMessage({ sound: null, speaker: null,
-        flavor: `${actor.name} recovers ${roll.total}${isTemporary ? " temporary HP" : "HP"} ${text}!`
+    await roll.toMessage({ sound: null, speaker: null,
+        flavor: `${actor.name} recovers ${roll.total}${isTemporary ? " temporary HP" : "HP"} from ${effectName}${extraText}!`
     });
 };
 
 /**
- * Apply lacerated effect damage to the actor.
- * @param {Actor5e} actor 
+ * Apply damage to the actor.
+ * @param {Object} actorUpdates An object with the current HP values of the actor
+ * @param {String} combatantId The id of the combatant
+ * @param {String} formula The formula to calculate the HP restored from
+ * @param {String} effectName The name of the effect triggering this damage
+ * @param {Boolean} halfDamage Whether damage applied should be cut in half
  */
-export async function applyDamage(actorUpdates, combatantId, formula, text, halfDamage = false) {
+export async function applyDamage(actorUpdates, combatantId, formula, effectName, halfDamage = false) {
     if (!formula) return;
 
     const combatant = game.combat.combatants.get(combatantId);
@@ -166,10 +175,11 @@ export async function applyDamage(actorUpdates, combatantId, formula, text, half
     const newHP = Math.max(HP - damage + tempHP, 0);
 
     // Warn if the HP reached 0
+    let extraText = "";
     if(HP > 0 && newHP == 0) {
-        text = `${text} while at ${HP}HP and is now <b>dying</b>`;
+        extraText = ` while at ${HP}HP and is now <b>dying</b>`;
     } else if (newHP == 0) {
-        text = `${text} while <b>dying</b>`;
+        extraText = ` while <b>dying</b>`;
     };
 
     // Apply HP
@@ -178,14 +188,20 @@ export async function applyDamage(actorUpdates, combatantId, formula, text, half
 
 
     // Display Chat Message
-    roll.toMessage({ sound: null, speaker: null,
-        flavor: `${actor.name} suffers ${damage} points of damage ${text}!`
+    await roll.toMessage({ sound: null, speaker: null,
+        flavor: `${actor.name} suffers ${damage} points of damage from ${effectName}${extraText}!`
     });
 };
 
 /**
- * Apply lacerated effect damage to the actor.
- * @param {Actor5e} combatant 
+ * Request a save to the DM
+ * @param {String} combatantId The id of the combatant
+ * @param {String} formula The formula to calculate the HP restored from
+ * @param {String} save The save to requests (STR, CON, DEX, INT, WIS, CHA)
+ * @param {String} effectName The name of the effect triggering this save request
+ * @param {Boolean} removeOnSave Whether the effect should be removed on a successful save
+ * @param {Boolean} halfDamage Whether the combatant still takes half damage on a successful save
+ * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
  */
 async function requestSave(combatantId, formula, save, effectName, removeOnSave = true, halfDamage = false, timestamp) {
     const combatant = game.combat.combatants.get(combatantId);
@@ -194,9 +210,16 @@ async function requestSave(combatantId, formula, save, effectName, removeOnSave 
     const success = `<button class='mae-save-success' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
     const fail = `<button class='mae-save-failure' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
-    ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
+    await ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
 };
 
+/**
+ * Handle Reality Break roll table
+ * @param {Object} actorUpdates An object with the current HP values of the actor
+ * @param {String} combatantId The id of the combatant
+ * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
+ * @returns 
+ */
 async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
@@ -207,8 +230,8 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
         case 1:
         case 2:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} is sees a Vision of the Far Realm from Reality Break and is <b>stunned</b> until the end of the turn!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Reality Break: ${actor.name} is sees a Vision of the Far Realm and is <b>stunned</b> until the end of the turn!`
             });
             await applyDamage(actorUpdates, combatantId, "6d12", "from Reality Break's Vision of the Far Realm");
             return 0;
@@ -216,8 +239,8 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
         case 4:
         case 5:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} is swallowed by a Rending Rift from Reality Break!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Reality Break: ${actor.name} is swallowed by a Rending Rift!`
             });
             await requestSave(combatantId, "8d12", "DEX", "Reality Break's Rending Rift", false, true, timestamp);
             return 1;
@@ -225,22 +248,26 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
         case 7:
         case 8:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} teleports up to 30 feet through a wormhole from Reality Break and is knocked <b>prone</b>!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Reality Break: ${actor.name} teleports up to 30 feet through a wormhole and is knocked <b>prone</b>!`
             });
             await applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Wormhole");
             return 0;
         case 9:
         case 10:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} chilled by the Dark Void from Reality Break and is <b>blinded</b> until the end of the turn!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Reality Break: ${actor.name} chilled by the Dark Void and is <b>blinded</b> until the end of the turn!`
             });
             await applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Dark Void");
     };
     return 0;
 };
 
+/**
+ * Handle Confusion roll table
+ * @param {String} combatantId The id of the combatant
+ */
 async function handleConfusion(combatantId) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
@@ -251,14 +278,14 @@ async function handleConfusion(combatantId) {
         case 1:
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} uses all its movement to move in a random direction. The creature doesn't take an action this turn!`
+                flavor: `Confusion: ${actor.name} uses all its movement to move in a random direction. The creature doesn't take an action this turn!`
             });
 
             const directions = ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"];
             const dirRoll = new Roll("1d8");
             await dirRoll.evaluate({async: true});
-            dirRoll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} uses all its movement to move <b>${directions[dirRoll.total - 1]}</b>!`
+            await dirRoll.toMessage({ sound: null, speaker: null,
+                flavor: `Confusion: ${actor.name} uses all its movement to move <b>${directions[dirRoll.total - 1]}</b>!`
             });
             break;
         case 2:
@@ -267,32 +294,30 @@ async function handleConfusion(combatantId) {
         case 5:
         case 6:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} doesn't move or take actions this turn!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Confusion: ${actor.name} doesn't move or take actions this turn!`
             });
             break;
         case 7:
         case 8:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} uses its action to make a melee attack against a randomly determined creature within its reach. If there is no creature within its reach, they do nothing this turn!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Confusion: ${actor.name} uses its action to make a melee attack against a randomly determined creature within its reach. If there is no creature within its reach, they do nothing this turn!`
             });
             break;
         case 9:
         case 10:
             // Display Chat Message
-            roll.toMessage({ sound: null, speaker: null,
-                flavor: `${actor.name} can act and move normally!!`
+            await roll.toMessage({ sound: null, speaker: null,
+                flavor: `Confusion: ${actor.name} can act and move normally!!`
             });
     };
 }
 
 /**
- * Resolves one save request.
- * @param {*} actorUpdates 
- * @param {*} tokenId 
- * @param {*} actorId 
- * @param {*} timestamp 
+ * Resolves one save request and triggers pending functions
+ * @param {Object} actorUpdates An object with the current HP values of the actor
+ * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
  */
 export async function handleResolvedSaveRequest(actorUpdates, timestamp) {
     // If there are any pending triggers on this timestamp

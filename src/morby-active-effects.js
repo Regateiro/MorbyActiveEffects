@@ -35,7 +35,7 @@ Hooks.once("ready", () => {
 
         // If the target still takes half damage on a successful save, apply the damage
         if (halfDamage) {
-            await applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, true);
+            await applyDamage(actorUpgrades, combatant._id, formula, effectName, true);
         };
 
         // Handle a save request resolution
@@ -57,7 +57,7 @@ Hooks.once("ready", () => {
         const timestamp = $(this).data('timestamp');
 
         // Apply effect damage
-        await applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, false);
+        await applyDamage(actorUpgrades, combatant._id, formula, effectName, false);
 
         // Handle a save request resolution
         await handleResolvedSaveRequest(actorUpgrades, timestamp);

@@ -28,7 +28,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Bonus to be applied by aid. Defaults to 5.",
-        toChatMessage: function (value) { return _toChatMessage("aid", "aided with an extra", "5", "current and maximum HP", value); }
+        toChatMessage: function (value) { return _toChatMessage("aid", `aided with an extra ${value || "5"} current and maximum HP`, value); }
     },
     "bane": {
         id: "bane",
@@ -41,7 +41,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("bane", "baned with a", "-1d4", "to attacks and saves", value); }
+        toChatMessage: function () { return _toChatMessage("bane", "baned, hindering attack rolls and saving throws by -1d4"); }
     },
     "barkskin": {
         id: "barkskin",
@@ -51,7 +51,7 @@ const _EFFECT_INFO = {
         changes: [{key: "system.attributes.ac.value", value: "16", mode: EFFECT_MODE.UPGRADE}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("barkskin", "protected by barkskin with a minimum of", "16", "to AC", value); }
+        toChatMessage: function () { return _toChatMessage("barkskin", "protected, setting their AC to a minimum of 16"); }
     },
     "bless": {
         id: "bless",
@@ -64,7 +64,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("bless", "blessed with an extra", "1d4", "to attacks and saves", value); }
+        toChatMessage: function () { return _toChatMessage("bless", "blessed with an extra 1d4 to attack rolls and saving throws"); }
     },
     "blood-boil": {
         id: "blood-boil",
@@ -74,17 +74,17 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.bloodboil", value: "7d6", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("blood-boil", "agonized with superheated blood, taking", "7d6", "fire damage on a failed CON save each turn", value); }
+        toChatMessage: function () { return _toChatMessage("blood-boil", "agonized with superheated blood, taking 7d6 fire damage on a failed CON save each turn"); }
     },
     "confusion": {
         id: "confusion",
         name: "Confusion",
-        icon: "icons/magic/death/skull-weapon-staff-glow-pink.webp",
+        icon: "icons/creatures/amphibians/frog-confused-green-blue.webp",
         commands: "confusion",
         changes: [{key: "flags.mae.confusion", value: "1", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("confusion", "confused, taking", "random", "actions each turn", value); }
+        toChatMessage: function () { return _toChatMessage("confusion", "confused, taking random actions each turn"); }
     },
     "divine-favor": {
         id: "divine-favor",
@@ -94,7 +94,7 @@ const _EFFECT_INFO = {
         changes: [{key: "system.bonuses.weapon.damage", value: "1d4", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("divine-favor", "empowered, enhancing weapon attacks with an extra", "1d4", "radiant damage", value); }
+        toChatMessage: function () { return _toChatMessage("divine-favor", "empowered, enhancing weapon attacks with an extra 1d4 radiant damage"); }
     },
     "enlarge": {
         id: "enlarge",
@@ -108,7 +108,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("enlarge", "enlarged, doubling their size and enhancing all attacks with an extra", "1d4", "damage", value); }
+        toChatMessage: function () { return _toChatMessage("enlarge", "enlarged, doubling their size and enhancing all attack damage by 1d4"); }
     },
     "ensnaring-strike": {
         id: "ensnaring-strike",
@@ -119,7 +119,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Damage to apply at the start of turn. Defaults to 1d6.",
-        toChatMessage: function (value) { return _toChatMessage("ensnaring-strike", "being pierced by thorns and taking", "1d6", "piercing damage every turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("ensnaring-strike", `being pierced by thorns and taking ${value || "1d6"} piercing damage every turn`, value); }
     },
     "gift-of-alacrity": {
         id: "gift-of-alacrity",
@@ -129,7 +129,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.initBonus", value: "1d8", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60*60*8,
-        toChatMessage: function (value) { return _toChatMessage("gift-of-alacrity", "gifted with alacrity, granting a", "1d8", "bonus to initiative", value); }
+        toChatMessage: function () { return _toChatMessage("gift-of-alacrity", "gifted with alacrity, granting a 1d8 bonus to initiative"); }
     },
     "guidance": {
         id: "guidance",
@@ -139,7 +139,7 @@ const _EFFECT_INFO = {
         changes: [{key: "system.bonuses.abilities.check", value: "1d4", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("guidance", "guided, gaining a", "1d4", "to skill checks", value); }
+        toChatMessage: function () { return _toChatMessage("guidance", "guided, gaining a 1d4 to skill checks"); }
     },
     "heroism": {
         id: "heroism",
@@ -149,8 +149,8 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.heroismTempHP", value: "0", mode: EFFECT_MODE.ADD}],
         locked: false,
         seconds: 60,
-        help: "Temporary HP to apply at the start of turn.",
-        toChatMessage: function (value) { return _toChatMessage("heroism", "imbued with bravery, receiving", "0", "temporary HP every turn", value); }
+        help: "Temporary HP to apply at the start of turn. Defaults to 0.",
+        toChatMessage: function (value) { return _toChatMessage("heroism", `imbued with bravery, receiving ${value || "0"} temporary HP every turn`, value); }
     },
     "id-insinuation": {
         id: "id-insinuation",
@@ -160,7 +160,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.idinsinuation", value: "1d12", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("id-insinuation", "suffering from conflicting desires, taking", "1d12", "psychic damage every turn", value); }
+        toChatMessage: function () { return _toChatMessage("id-insinuation", "suffering from conflicting desires, taking 1d12 psychic damage every turn"); }
     },
     "immolation": {
         id: "immolation",
@@ -170,7 +170,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.immolation", value: "6d6", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("immolation", "wreathed in flames, taking", "6d6", "fire damage on a failed DEX save each turn", value); }
+        toChatMessage: function () { return _toChatMessage("immolation", "wreathed in flames, taking 6d6 fire damage on a failed DEX save each turn"); }
     },
     "initiative-bonus": {
         id: "initiative-bonus",
@@ -181,7 +181,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60*60*8,
         help: "Bonus to be applied to initiative. Defaults to 1d8.",
-        toChatMessage: function (value) { return _toChatMessage("initiative-bonus", "more alert, granting a", "1d8", "bonus to initiative", value); }
+        toChatMessage: function (value) { return _toChatMessage("initiative-bonus", `more alert, granting a ${value || "1d8"} bonus to initiative`, value); }
     },
     "killing-winds": {
         id: "killing-winds",
@@ -191,7 +191,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.killingwinds", value: "4d12", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("killing-winds", "corroding rapidly, taking", "4d12", "acid damage on a failed CON save each turn", value); }
+        toChatMessage: function () { return _toChatMessage("killing-winds", "corroding rapidly, taking 4d12 acid damage on a failed CON save each turn"); }
     },
     "lacerated": {
         id: "lacerated",
@@ -201,8 +201,8 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.lacerated", value: "0", mode: EFFECT_MODE.ADD}],
         locked: false,
         seconds: 60,
-        help: "Damage to apply at the start of turn.",
-        toChatMessage: function (value) { return _toChatMessage("lacerated", "lacerated, bleeding for", "0", "damage every turn", value); }
+        help: "Damage to apply at the start of turn. Defaults to 0.",
+        toChatMessage: function (value) { return _toChatMessage("lacerated", `lacerated, bleeding for ${value || "0"} damage every turn`, value); }
     },
     "melfs-acid-arrow": {
         id: "melfs-acid-arrow",
@@ -212,8 +212,8 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.acidarrow", value: "2d4", mode: EFFECT_MODE.ADD}],
         locked: false,
         seconds: 60,
-        help: "Damage to apply at the end of turn.",
-        toChatMessage: function (value) { return _toChatMessage("melfs-acid-arrow", "suffering from acid burns and taking", "2d4", "damage next turn", value); }
+        help: "Damage to apply at the end of turn. Defaults to 2d4.",
+        toChatMessage: function (value) { return _toChatMessage("melfs-acid-arrow", `suffering from acid burns and taking ${value || "2d4"} damage next turn`, value); }
     },
     "phantasmal-killer": {
         id: "phantasmal-killer",
@@ -223,8 +223,8 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.pkiller", value: "6d10", mode: EFFECT_MODE.ADD}],
         locked: false,
         seconds: 60,
-        help: "Damage to apply at the end of turn.",
-        toChatMessage: function (value) { return _toChatMessage("phantasmal-killer", "facing their deepest fears, taking", "6d10", "psychic damage on a failed WIS save each turn", value); }
+        help: "Damage to apply at the end of turn. Defaults to 6d10.",
+        toChatMessage: function (value) { return _toChatMessage("phantasmal-killer", `facing their deepest fears, taking ${value || "6d10"} psychic damage on a failed WIS save each turn`, value); }
     },
     "reduce": {
         id: "reduce",
@@ -238,7 +238,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("reduce", "reduced, halving their size and hindering all attack damage by", "-1d4", "damage every turn", value); }
+        toChatMessage: function () { return _toChatMessage("reduce", "reduced, halving their size and hindering all attack damage by -1d4"); }
     },
     "reality-break": {
         id: "reality-break",
@@ -250,7 +250,7 @@ const _EFFECT_INFO = {
         ],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("reality-break", "in turmoil and madness, suffering", "6d12, 8d12, or 10d12", "damage every turn", value); }
+        toChatMessage: function () { return _toChatMessage("reality-break", "in turmoil and madness, sufferin 6d12, 8d12, or 10d12 damage every turn"); }
     },
     "regenerate": {
         id: "regenerate",
@@ -263,7 +263,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 3600,
         help: "Health to be regenerated. Defaults to 10.",
-        toChatMessage: function (value) { return _toChatMessage("regenerate", "regenerating", "10", "HP every turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("regenerate", `regenerating ${value || "10"} HP every turn`, value); }
     },
     "tashas-caustic-brew": {
         id: "tashas-caustic-brew",
@@ -274,7 +274,7 @@ const _EFFECT_INFO = {
         locked: false,
         seconds: 60,
         help: "Damage to apply at the start of turn. Defaults to 2d4.",
-        toChatMessage: function (value) { return _toChatMessage("tashas-caustic-brew", "suffering from acid burns and taking", "2d4", "acid damage every turn", value); }
+        toChatMessage: function (value) { return _toChatMessage("tashas-caustic-brew", `suffering from acid burns, taking ${value || "2d4"} acid damage every turn`, value); }
     },
     "vitriolic-sphere": {
         id: "vitriolic-sphere",
@@ -284,8 +284,8 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.vsphere", value: "5d4", mode: EFFECT_MODE.ADD}],
         locked: false,
         seconds: 60,
-        help: "Damage to apply at the end of turn.",
-        toChatMessage: function (value) { return _toChatMessage("vitriolic-sphere", "suffering from acid burns and taking", "5d4", "acid damage next turn", value); }
+        help: "Damage to apply at the end of turn. Defaults to 5d4.",
+        toChatMessage: function (value) { return _toChatMessage("vitriolic-sphere", `suffering from acid burns and taking ${value || "5d4"} acid damage next turn`, value); }
     },
     "voracious-poison": {
         id: "voracious-poison",
@@ -295,7 +295,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.vpoison", value: "16d8", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("voracious-poison", "poisoned, taking", "16d8", "poison on a failed CON save each turn", value); }
+        toChatMessage: function () { return _toChatMessage("voracious-poison", "poisoned, taking 16d8 poison on a failed CON save each turn"); }
     },
     "weird": {
         id: "weird",
@@ -305,7 +305,7 @@ const _EFFECT_INFO = {
         changes: [{key: "flags.mae.weird", value: "11d10", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
-        toChatMessage: function (value) { return _toChatMessage("weird", "facing their deepest fears, taking", "11d10", "psychic on a failed WIS save each turn", value); }
+        toChatMessage: function () { return _toChatMessage("weird", "facing their deepest fears, taking 11d10 psychic damage on a failed WIS save each turn"); }
     }
 };
 
@@ -367,13 +367,14 @@ export const EFFECTS = {
 
 /**
  * Converts an effect to a chat message upon application.
- * @param {*} effectVerb 
- * @param {*} effectDesc 
- * @param {*} defaultValue 
- * @param {*} value 
- * @returns 
+ * @param {String} effectId The id of the effect to convert
+ * @param {String} preText Prefix for what the effect does
+ * @param {String} effectValue How much damage/healing/other is the effect doing
+ * @param {String} postText The suffix for what the effect does
+ * @param {String} value The value associated with the effect to pass to the callback
+ * @returns A string with the effect data to be put into chat.
  */
-function _toChatMessage(effectId, preText, effectValue, postText, value) {
+function _toChatMessage(effectId, text, userValue) {
     // Join the token names and select the target verb
     let targets = Object.values(targetedTokens).map(t => t.name).join(", ");
     let targetVerb = "is";
@@ -384,9 +385,9 @@ function _toChatMessage(effectId, preText, effectValue, postText, value) {
         targetVerb = "are";
     };
     // Use the default value if the other value is not given
-    value = value || effectValue;
+    const value = userValue || "";
     // Define the apply button for other users
     const button = `<button class='mae-apply-effect' data-effect-id=${effectId} data-effect-value=${value}><i class="fas fa-hand-holding-magic"></i>Apply Effect</button>`;
     // return the code
-    return `${targets} ${targetVerb} now ${preText} ${value} ${postText}. ${button}`;
+    return `${targets} ${targetVerb} now ${text}. ${button}`;
 };

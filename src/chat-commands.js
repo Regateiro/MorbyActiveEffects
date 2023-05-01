@@ -53,6 +53,11 @@ async function handleCommand(chat, parameters, messageData) {
     return {};
 };
 
+/**
+ * Apply an effect to all targeted tokens
+ * @param {String} effectId 
+ * @param {String} value 
+ */
 export async function applyEffectToAllTargets(effectId, value) {
     const effectInfo = EFFECTS[effectId];
     for (const token of Object.values(targetedTokens)) {
@@ -74,6 +79,14 @@ export async function applyEffectToAllTargets(effectId, value) {
     };
 };
 
+/**
+ * Modify the effect change given the token context
+ * @param {String} effectInfo 
+ * @param {Token5e} token 
+ * @param {Object} change 
+ * @param {String} value 
+ * @returns The modified change object
+ */
 async function handleDynamicChanges(effectInfo, token, change, value) {
     change = Object.assign({}, change);
     if (!effectInfo.locked) {
