@@ -106,7 +106,6 @@ export async function generateActorUpdates(combatantId) {
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     return {
         "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
-        "system.attributes.hp.max": Number(actor.system.attributes.hp.max),
         "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
     };
 };
@@ -137,7 +136,7 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
         }
         actorUpdates["system.attributes.hp.value"] = Math.min(
             actorUpdates["system.attributes.hp.value"] + roll.total, 
-            actorUpdates["system.attributes.hp.max"]
+            Number(actor.system.attributes.hp.max)
         );
     };
 
