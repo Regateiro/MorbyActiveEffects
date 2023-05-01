@@ -172,7 +172,7 @@ export async function applyDamage(actorUpdates, combatantId, formula, effectName
     const tempHP = actorUpdates["system.attributes.hp.temp"];
     const newTempHP = Math.max(tempHP - damage, 0);
     const HP = actorUpdates["system.attributes.hp.value"];
-    const newHP = Math.max(HP - damage + tempHP, 0);
+    const newHP = HP - Math.max(damage - tempHP, 0);
 
     // Warn if the HP reached 0
     let extraText = "";
