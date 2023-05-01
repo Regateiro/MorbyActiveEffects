@@ -14,6 +14,7 @@ The list of supported effects/conditions is shown in the table below.
 | Bane                 | -1d4 to attacks and saving throws               | No                     | /mae bane                      |                   |
 | Barkskin             | 16 minimum to AC                                | No                     | /mae barkskin                  | bark              |
 | Bless                | +1d4 to attacks and saving throws               | No                     | /mae bless                     |                   |
+| Confusion            | Random actions each turn                        | No                     | /mae confusion                 |                   |
 | Divine Favor         | +1d4 to weapon damage                           | No                     | /mae divine-favor              | df                |
 | Blood Boil           | +7d6 damage at the end of turn on failed save   | No                     | /mae blood-boil                | bb                |
 | Enlarge              | +1d4 to weapon damage + token size              | No                     | /mae enlarge                   |                   |

@@ -14,14 +14,14 @@ Hooks.once("ready", () => {
         .filter((actor) => !actor.flags?.mae)
         .forEach((actor) => actor.update({"flags.mae": {}}));
     // Bind apply effect buttons to the callback
-    $(document).on('click', '.mae-apply-effect', function () {
-        applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value'));
+    $(document).on('click', '.mae-apply-effect', async function () {
+        await applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value'));
     });
     // Bind save success buttons to the callback
-    $(document).on('click', '.mae-save-success', function () {
+    $(document).on('click', '.mae-save-success', async function () {
         const combatant = game.combat.combatants.get($(this).data('combatant-id'));
         const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-        const actorUpgrades = generateActorUpdates(combatant._id);
+        const actorUpgrades = await generateActorUpdates(combatant._id);
         const formula = $(this).data('effect-formula');
         const effectName = $(this).data('effect-name');
         const removeEffect = Boolean($(this).data('remove'));
@@ -30,43 +30,43 @@ Hooks.once("ready", () => {
 
         // If the effect is to be removed on a successful save, do it
         if (removeEffect) {
-            effectsAPI.removeEffectOnToken(combatant.tokenId, effectName);
-        }
+            await effectsAPI.removeEffectOnToken(combatant.tokenId, effectName);
+        };
 
         // If the target still takes half damage on a successful save, apply the damage
         if (halfDamage) {
-            applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, true);
-        }
+            await applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, true);
+        };
 
         // Handle a save request resolution
-        handleResolvedSaveRequest(actorUpgrades, timestamp);
+        await handleResolvedSaveRequest(actorUpgrades, timestamp);
 
         // Update the actor
-        actor.update(actorUpgrades);
+        await actor.update(actorUpgrades);
 
         // Delete the chat message with the save request as it is no longer needed
-        game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+        await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
     });
     // Bind save failure buttons to the callback
-    $(document).on('click', '.mae-save-failure', function () {
+    $(document).on('click', '.mae-save-failure', async function () {
         const combatant = game.combat.combatants.get($(this).data('combatant-id'));
         const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-        const actorUpgrades = generateActorUpdates(combatant._id);
+        const actorUpgrades = await generateActorUpdates(combatant._id);
         const formula = $(this).data('effect-formula');
         const effectName = $(this).data('effect-name');
         const timestamp = $(this).data('timestamp');
 
         // Apply effect damage
-        applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, false);
+        await applyDamage(actorUpgrades, combatant._id, formula, `from ${effectName}`, false);
 
         // Handle a save request resolution
-        handleResolvedSaveRequest(actorUpgrades, timestamp);
+        await handleResolvedSaveRequest(actorUpgrades, timestamp);
 
         // Update the actor
-        actor.update(actorUpgrades);
+        await actor.update(actorUpgrades);
 
         // Delete the chat message with the save request as it is no longer needed
-        game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+        await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
     });
 });
 
@@ -96,8 +96,8 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
     if(actor?.isOwner) {
         if(actor.flags?.mae?.initBonus) {
             roll._formula += (" + " + actor.flags.mae.initBonus);
-        }
-    }
+        };
+    };
 });
 
 /**
@@ -105,9 +105,12 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
  */
 Hooks.on("updateCombat", (combat, turn, diff, userId) => {
     if(game.user.isGM) {
-        handleTurnEndEffects(combat); // Previous Turn
-        handleTurnStartEffects(combat); // Current Turn
-    }
+        // Previous Turn
+        handleTurnEndEffects(combat).then(() => {
+            // Current Turn
+            handleTurnStartEffects(combat);
+        });
+    };
 });
 
 /**
@@ -118,5 +121,5 @@ Hooks.on("targetToken", (user, token, targetted) => {
         targettedTokens[token.id] = token;
     } else {
         delete targettedTokens[token.id];
-    }
+    };
 });
