@@ -324,6 +324,7 @@ const _EFFECT_INFO = {
         commands: "armor-mastery | am",
         changes: [{key: "flags.mae.armorMastery", value: "0", mode: EFFECT_MODE.ADD}],
         locked: false,
+        seconds: null,
         help: "Temporary HP to add after a rest. Defaults to 0.",
         toChatMessage: function () {}
     }
