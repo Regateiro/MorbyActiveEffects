@@ -34,8 +34,11 @@ async function handleCommand(chat, parameters, messageData) {
         // Get the effect information
         const effectInfo = EFFECTS[parameters[0]];
         // For each token that is selected
+        let effectMsg = effectInfo.toChatMessage(parameters[1]);
         await applyEffectToAllTargets(parameters[0], parameters[1]);
-        await ChatMessage.create({content: effectInfo.toChatMessage(parameters[1])});
+        if (effectMsg) {
+            await ChatMessage.create({content: effectMsg});
+        };
     // If the first parameter is a clear command
     } else if (parameters[0] == "clear") {
         // Determine if the second parameter corresponds to an effect
@@ -76,6 +79,10 @@ export async function applyEffectToAllTargets(effectId, value) {
         };
         // Add the effect to the token
         await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
+        // If the effect is Aid, heal the target as well on application
+        if (effectInfo.id == "aid") {
+            await token.actor.update({"system.attributes.hp.value": (token.actor.system.attributes.hp.value + (Number(value) || 5))});
+        }
     };
 };
 

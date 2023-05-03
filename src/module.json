@@ -10,7 +10,7 @@
         }
     ],
     "url": "https://github.com/Regateiro/MorbyActiveEffects/tree/master",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "compatibility": {
         "minimum": "10.291",
         "verified": "10"
@@ -63,6 +63,15 @@
                 "compatibility": {
                     "minimum": "0.5.3",
                     "verified": "0.5.3"
+                }
+            },
+            {
+                "id": "bettercombatdamage",
+                "type": "module",
+                "manifest": "https://raw.githubusercontent.com/Regateiro/BetterCombatDamage/master/bettercombatdamage/module.json",
+                "compatibility": {
+                    "minimum": "1.2.4",
+                    "verified": "1.2.4"
                 }
             }
         ]

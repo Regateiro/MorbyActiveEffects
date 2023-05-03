@@ -16,6 +16,19 @@ const EFFECT_MODE = {
  * Internal effect information
  */
 const _EFFECT_INFO = {
+    "aid": {
+        id: "aid",
+        name: "Aid",
+        icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/heal-sky-1.jpg",
+        commands: "aid",
+        changes: [
+            {key: "system.attributes.hp.tempmax", value: "5", mode: EFFECT_MODE.ADD}
+        ],
+        locked: false,
+        seconds: 60,
+        help: "Bonus to be applied by aid. Defaults to 5.",
+        toChatMessage: function (value) { return _toChatMessage("aid", `aided with an extra ${value || "5"} current and maximum HP`, value); }
+    },
     "bane": {
         id: "bane",
         name: "Bane",
@@ -302,6 +315,17 @@ const _EFFECT_INFO = {
         locked: true,
         seconds: 60,
         toChatMessage: function () { return _toChatMessage("weird", "facing their deepest fears, taking 11d10 psychic damage on a failed WIS save each turn"); }
+    },
+    /******* Armor Mastery *******/
+    "armor-mastery": {
+        id: "armor-mastery",
+        name: "Armor Mastery",
+        icon: "icons/skills/melee/shield-block-gray-yellow.webp",
+        commands: "armor-mastery | am",
+        changes: [{key: "flags.mae.armorMastery", value: "0", mode: EFFECT_MODE.ADD}],
+        locked: false,
+        help: "Temporary HP to add after a rest. Defaults to 0.",
+        toChatMessage: function () {}
     }
 };
 
@@ -309,6 +333,7 @@ const _EFFECT_INFO = {
  * Effect aliases to information mapping
  */
 export const EFFECTS = {
+    "aid": _EFFECT_INFO["aid"],
     "bane": _EFFECT_INFO["bane"],
     "bark": _EFFECT_INFO["barkskin"],
     "barkskin": _EFFECT_INFO["barkskin"],
@@ -360,6 +385,9 @@ export const EFFECTS = {
     "vpoison": _EFFECT_INFO["voracious-poison"],
     "voracious-poison": _EFFECT_INFO["voracious-poison"],
     "weird": _EFFECT_INFO["weird"],
+    /******* Armor Mastery *******/
+    "am": _EFFECT_INFO["armor-mastery"],
+    "armor-mastery": _EFFECT_INFO["armor-mastery"]
 };
 
 /**

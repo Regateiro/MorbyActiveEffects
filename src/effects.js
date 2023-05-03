@@ -1,4 +1,4 @@
-import { effectsAPI } from "./morby-active-effects.js";
+import { effectsAPI, preLongRestArmorMastery } from "./morby-active-effects.js";
 
 /**
  * Triggers waiting for save request resolution
@@ -12,7 +12,7 @@ let pendingTriggers = {};
 export async function handleTurnStartEffects(combat) {
     const combatant = combat.combatants.get(combat.current.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = await generateActorUpdates(combatant._id);
+    let actorUpdates = await generateActorUpdatesFromCombatant(combatant._id);
 
     let saveRequests = 0;
     const timestamp = String(Date.now());
@@ -59,7 +59,7 @@ export async function handleTurnStartEffects(combat) {
 export async function handleTurnEndEffects(combat) {
     const combatant = combat.combatants.get(combat.previous.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = await generateActorUpdates(combatant._id);
+    let actorUpdates = await generateActorUpdatesFromCombatant(combatant._id);
 
     if(actor.flags?.mae?.idinsinuation) {
         await applyDamage(actorUpdates, combatant._id, actor.flags.mae.idinsinuation, "Id Insinuation");
@@ -100,17 +100,45 @@ export async function handleTurnEndEffects(combat) {
     await actor.update(actorUpdates);
 };
 
+export async function handleRestEffects(actor, isLongRest) {
+    const actorUpdates = await generateActorUpdatesFromActor(actor);
+
+    if(actor.flags?.mae?.armorMastery) {
+        if (isLongRest) {
+            // Make sure the armor tempHP stays after a long rest
+            actorUpdates["system.attributes.hp.temp"] = preLongRestArmorMastery[actor._id];
+            actorUpdates["flags.mae.tempArmorMastery"] = preLongRestArmorMastery[actor._id];
+        }
+        const diff = actor.flags.mae.armorMastery - actorUpdates["system.attributes.hp.temp"];
+        if (diff > 0) {
+            await requestArmorMasteryRestoration(actor, diff);
+        }
+    };
+
+    await actor.update(actorUpdates);
+};
+
 /**
  * Generates a new actorUpdates variable from a combatant
  * @param {String} combatantId The id of the combatant
  * @returns An object with current actor values
  */
-export async function generateActorUpdates(combatantId) {
+export async function generateActorUpdatesFromCombatant(combatantId) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+    return await generateActorUpdatesFromActor(actor);
+};
+
+/**
+ * Generates a new actorUpdates variable from an actor
+ * @param {Actor5e} actor The id of the combatant
+ * @returns An object with current actor values
+ */
+export async function generateActorUpdatesFromActor(actor) {
     return {
         "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
-        "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp)
+        "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp),
+        "flags.mae.tempArmorMastery": Number(actor.flags.mae.tempArmorMastery)
     };
 };
 
@@ -130,9 +158,9 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
 
     let extraText = "";
     if (isTemporary) {
-        // Apply tempHP if it is higher than the current amount TODO: Armor Masteries support
-        if(actorUpdates["system.attributes.hp.temp"] < roll.total) {
-            actorUpdates["system.attributes.hp.temp"] = roll.total;
+        // Apply tempHP if it is higher than the current amount
+        if(actorUpdates["system.attributes.hp.temp"] < actorUpdates["flags.mae.tempArmorMastery"] + roll.total) {
+            actorUpdates["system.attributes.hp.temp"] = actorUpdates["flags.mae.tempArmorMastery"] + roll.total;
         }
     } else {
         if (actorUpdates["system.attributes.hp.value"] == 0 && roll.total > 0) {
@@ -140,7 +168,7 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
         }
         actorUpdates["system.attributes.hp.value"] = Math.min(
             actorUpdates["system.attributes.hp.value"] + roll.total, 
-            Number(actor.system.attributes.hp.max)
+            Number(actor.system.attributes.hp.max) + Number(actor.system.attributes.hp.tempmax)
         );
     };
 
@@ -209,11 +237,24 @@ export async function applyDamage(actorUpdates, combatantId, formula, effectName
 async function requestSave(combatantId, formula, save, effectName, timestamp, removeOnSave = true, halfDamage = false) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    // Define the apply button for other users
+    // Define the buttons
     const success = `<button class='mae-save-success' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
     const fail = `<button class='mae-save-failure' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
     await ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
+};
+
+/**
+ * Prompt the user with a question
+ * @param {Actor5e} actor The actor
+ * @param {Number} diff The difference in temp HP to restore
+ */
+async function requestArmorMasteryRestoration(actor, diff) {
+    // Define the buttons
+    const yes = `<button class='mae-am-yes' data-actor-id='${actor._id}'><i class="fas fa-check"></i>Yes</button>`;
+    const no = `<button class='mae-am-no' data-actor-id='${actor._id}'><i class="fas fa-xmark"></i>No</button>`;
+    // Print the message
+    await ChatMessage.create({content: `${actor.name}'s Armor Mastery is missing ${diff} temporary HP. Restore? ${yes} ${no}`, whisper: game.userId});
 };
 
 /**

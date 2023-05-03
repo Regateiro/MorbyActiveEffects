@@ -1,8 +1,9 @@
 import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
-import { applyDamage, generateActorUpdates, handleResolvedSaveRequest, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
+import { applyDamage, generateActorUpdatesFromActor, generateActorUpdatesFromCombatant, handleResolvedSaveRequest, handleRestEffects, handleTurnEndEffects, handleTurnStartEffects } from "./effects.js";
 
 export let effectsAPI = null;
 export const targetedTokens = {};
+export const preLongRestArmorMastery = {};
 
 /**
  * One time registration steps for settings and core function overrides.
@@ -21,7 +22,7 @@ Hooks.once("ready", () => {
     $(document).on('click', '.mae-save-success', async function () {
         const combatant = game.combat.combatants.get($(this).data('combatant-id'));
         const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-        const actorUpgrades = await generateActorUpdates(combatant._id);
+        const actorUpgrades = await generateActorUpdatesFromCombatant(combatant._id);
         const formula = $(this).data('effect-formula');
         const effectName = $(this).data('effect-name');
         const removeEffect = Boolean($(this).data('remove'));
@@ -51,7 +52,7 @@ Hooks.once("ready", () => {
     $(document).on('click', '.mae-save-failure', async function () {
         const combatant = game.combat.combatants.get($(this).data('combatant-id'));
         const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-        const actorUpgrades = await generateActorUpdates(combatant._id);
+        const actorUpgrades = await generateActorUpdatesFromCombatant(combatant._id);
         const formula = $(this).data('effect-formula');
         const effectName = $(this).data('effect-name');
         const timestamp = $(this).data('timestamp');
@@ -66,6 +67,31 @@ Hooks.once("ready", () => {
         await actor.update(actorUpgrades);
 
         // Delete the chat message with the save request as it is no longer needed
+        await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+    });
+    // Bind Armor mastery yes buttons to the callback
+    $(document).on('click', '.mae-am-yes', async function () {
+        const actor = game.actors.get($(this).data('actor-id'));
+        const actorUpdates = await generateActorUpdatesFromActor(actor);
+        const maxArmorMastery = Number(actor.flags.mae.armorMastery);
+        const currArmorMastery = Number(actor.flags.mae.tempArmorMastery || 0);
+        const tempHPDiff = maxArmorMastery - currArmorMastery;
+
+        actorUpdates["system.attributes.hp.temp"] += tempHPDiff;
+        actorUpdates["flags.mae.tempArmorMastery"] = maxArmorMastery;
+
+        // Update the actor
+        await actor.update(actorUpdates);
+
+        // Delete the chat message with the save request as it is no longer needed
+        await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
+
+        // Display that the temporary HP was restored
+        await ChatMessage.create({content: `${actor.name}'s has spent resources to restore ${tempHPDiff} temporary HP from armor mastery!`});
+    });
+    // Bind Armor mastery no buttons to the callback
+    $(document).on('click', '.mae-am-no', async function () {
+        // Delete the chat message as it is no longer needed
         await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
     });
 });
@@ -101,7 +127,7 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
 });
 
 /**
- * Apply spell effects at the start of the turn
+ * Apply effects at the start of the turn
  */
 Hooks.on("updateCombat", (combat, turn, diff, userId) => {
     if(game.user.isGM) {
@@ -111,6 +137,22 @@ Hooks.on("updateCombat", (combat, turn, diff, userId) => {
             handleTurnStartEffects(combat);
         });
     };
+});
+
+/**
+ * Save the current armor mastery temp HP before it is wiped from the long rest
+ */
+Hooks.on("dnd5e.preRestCompleted", (actor, restInfo) => {
+    if (restInfo.longRest) {
+        preLongRestArmorMastery[actor._id] = actor.flags.mae.tempArmorMastery;
+    };
+});
+
+/**
+ * Apply effects when a rest is taken
+ */
+Hooks.on("dnd5e.restCompleted", (actor, restInfo) => {
+    setTimeout(() => handleRestEffects(actor, restInfo.longRest), 500);
 });
 
 /**
