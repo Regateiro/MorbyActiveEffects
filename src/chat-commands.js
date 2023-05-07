@@ -65,7 +65,7 @@ async function handleCommand(chat, parameters, messageData) {
 
             // Display the current temporary HP details of the target
             await ChatMessage.create({
-                content: `${token.name} has ${amTempHP} temp HP from armor mastery and ${tempHP} temp HP from other sources!`
+                content: `${token.name} has ${amTempHP}/${token.actor.flags.mae.armorMastery} temp HP from armor mastery and ${tempHP} temp HP from other sources!`
             });
         };
     };
