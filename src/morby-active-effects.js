@@ -159,9 +159,11 @@ Hooks.on("dnd5e.restCompleted", (actor, restInfo) => {
  * Keep track of which token is being targeted
  */
 Hooks.on("targetToken", (user, token, targeted) => {
-    if(targeted) {
-        targetedTokens[token.id] = token;
-    } else {
-        delete targetedTokens[token.id];
-    };
+    if (user._id == game.userId) {
+        if(targeted) {
+            targetedTokens[token.id] = token;
+        } else {
+            delete targetedTokens[token.id];
+        };
+    }
 });
