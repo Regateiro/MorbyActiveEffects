@@ -51,6 +51,23 @@ async function handleCommand(chat, parameters, messageData) {
                 await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
             };
         };
+    } else if (parameters[0] == "amthp") {
+        for (const token of Object.values(targetedTokens)) {
+            let amTempHP = token.actor.flags.mae.tempArmorMastery;
+            let tempHP = token.actor.system.attributes.hp.temp - amTempHP;
+
+            // If a new armor mastery value is provided, update it (0 < newValue < maxValue)
+            if(Boolean(parameters[1])) {
+                amTempHP = Math.max(Math.min(Number(parameters[1]), token.actor.flags.mae.armorMastery), 0);
+                await token.actor.update({"flags.mae.tempArmorMastery": amTempHP});
+                await token.actor.update({"system.attributes.hp.temp": amTempHP + tempHP});
+            };
+
+            // Display the current temporary HP details of the target
+            await ChatMessage.create({
+                content: `${token.name} has ${amTempHP} temp HP from armor mastery and ${tempHP} temp HP from other sources!`
+            });
+        };
     };
 
     return {};
@@ -82,7 +99,14 @@ export async function applyEffectToAllTargets(effectId, value) {
         // If the effect is Aid, heal the target as well on application
         if (effectInfo.id == "aid") {
             await token.actor.update({"system.attributes.hp.value": (token.actor.system.attributes.hp.value + (Number(value) || 5))});
-        }
+        // If the effect is armor mastery, set the current armor mastery pool to the value set
+        } else if (effectInfo.id == "armor-mastery") {
+            let amTempHP = token?.actor?.flags?.mae?.tempArmorMastery || 0;
+            let tempHP = token.actor.system.attributes.hp.temp - amTempHP;
+            amTempHP = Number(value) || 0;
+            await token.actor.update({"flags.mae.tempArmorMastery": amTempHP});
+            await token.actor.update({"system.attributes.hp.temp": amTempHP + tempHP});
+        };
     };
 };
 
@@ -136,6 +160,7 @@ async function handleDynamicChanges(effectInfo, token, change, value) {
 function handleAutoComplete(menu, alias, parameters) {
     // Split the parameters into separate fields
     parameters = parameters.toLowerCase().split(" ");
+    const special = ["clear", "amthp"];
 
     // Create an empty list of autocomplete entries
     let entries = [];
@@ -148,10 +173,18 @@ function handleAutoComplete(menu, alias, parameters) {
                 entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
             };
         });
+        // Add a separator if there are normal entries and special command entries
+        if(entries.length > 0 && special.find(c => c.startsWith(parameters[0]))) {
+            entries.length = Math.min(entries.length, menu.maxEntries - special.length - 1);
+            entries.push(game.chatCommands.createSeparatorElement());
+        }
+        // If the first parameter is matching the start of the clear command
+        if("amthp".startsWith(parameters[0])) {
+            // Add clear as a possible command to the autocompletion
+            entries.push(game.chatCommands.createInfoElement("amthp - show armor mastery temporary HP"));
+        };
         // If the first parameter is matching the start of the clear command
         if("clear".startsWith(parameters[0])) {
-            // Add a separator
-            if(entries.length > 0) entries.push(game.chatCommands.createSeparatorElement());
             // Add clear as a possible command to the autocompletion
             entries.push(game.chatCommands.createInfoElement("clear - remove effect from token"));
         };
@@ -166,6 +199,10 @@ function handleAutoComplete(menu, alias, parameters) {
                         entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
                     };
                 });
+                break;
+            case "amthp":
+                // Add all the effect entries that match the start of the second parameter
+                entries.push(game.chatCommands.createInfoElement("Value to set armor mastery temporary HP to."));
                 break;
             default:
                 // Otherwise, add the help description of the effect specified in the first parameter

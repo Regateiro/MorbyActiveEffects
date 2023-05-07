@@ -67,7 +67,7 @@ The Armor Mastery effect is special. It essentially creates a new pool of stacka
 
 For example, consider a character with a set of full plate armor (18AC) and with the Armor Mastery effect granting the associated 27 pool of temporary HP. Later, Heroism is cast on them, granting an additional 4 temporary HP. The character sheet will now display 31 temporary HP. During combat, the character took 10 points of damage, reducing their temporary HP down to 21. The party then takes a short rest, and the player controlling that character is then asked if they want to spend resources to recover 6 temporary HP from Armor Mastery (10 total damage - 4 heroism temporary HP = 6 armor mastery temporary HP lost).
 
-Please note that if the amount of temporary HP is reduced by mistake, the player should track the Armor Mastery temporary HP as it is not possible to undo damage to Armor Mastery temporary HP at this point in the UI/chat or ask me to fix the issue (a command will have to be executed in the browser console).
+Please note that if the amount of temporary HP is reduced by mistake, the player can set the current armor mastery temporary HP using the `/mae amthp <value>` command. If a value is not provided, the current armor mastery temporary HP is displayed, alongside the temporary HP from other sources.
 
 My [BetterCombatDamage](https://github.com/Regateiro/BetterCombatDamage) module is now required so that the Armor Mastery pool of temporary hit points is updated when taking damage.
 

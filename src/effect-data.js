@@ -335,6 +335,8 @@ const _EFFECT_INFO = {
  */
 export const EFFECTS = {
     "aid": _EFFECT_INFO["aid"],
+    "am": _EFFECT_INFO["armor-mastery"],
+    "armor-mastery": _EFFECT_INFO["armor-mastery"],
     "bane": _EFFECT_INFO["bane"],
     "bark": _EFFECT_INFO["barkskin"],
     "barkskin": _EFFECT_INFO["barkskin"],
@@ -386,9 +388,6 @@ export const EFFECTS = {
     "vpoison": _EFFECT_INFO["voracious-poison"],
     "voracious-poison": _EFFECT_INFO["voracious-poison"],
     "weird": _EFFECT_INFO["weird"],
-    /******* Armor Mastery *******/
-    "am": _EFFECT_INFO["armor-mastery"],
-    "armor-mastery": _EFFECT_INFO["armor-mastery"]
 };
 
 /**
