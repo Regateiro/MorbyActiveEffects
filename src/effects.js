@@ -161,7 +161,9 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
         // Apply tempHP if it is higher than the current amount
         if(actorUpdates["system.attributes.hp.temp"] < actorUpdates["flags.mae.tempArmorMastery"] + roll.total) {
             actorUpdates["system.attributes.hp.temp"] = actorUpdates["flags.mae.tempArmorMastery"] + roll.total;
-        }
+        } else {
+            extraText = `, but they still have ${actorUpdates["system.attributes.hp.temp"] - actorUpdates["flags.mae.tempArmorMastery"]} unstackable temporary HP`;
+        };
     } else {
         if (actorUpdates["system.attributes.hp.value"] == 0 && roll.total > 0) {
             extraText = ` while at 0HP and is <b>no longer dying</b>`;
@@ -174,7 +176,7 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
 
     // Display Chat Message
     await roll.toMessage({ sound: null, speaker: null,
-        flavor: `${actor.name} recovers ${roll.total}${isTemporary ? " temporary HP" : "HP"} from ${effectName}${extraText}!`
+        flavor: `${actor.name} ${isTemporary ? "gains up to" : "recovers"} ${roll.total} ${isTemporary ? "temporary HP" : "HP"} from ${effectName}${extraText}!`
     });
 };
 
