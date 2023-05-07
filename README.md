@@ -61,6 +61,16 @@ In short, to target a token you just need to hold the `alt` key while clicking o
 
 Look into the Smart Target configuration options if you'd rather use sticky targeting (you just need to press `alt` to target multiple tokens but you need to click on the tokens again to untarget them), or to change other settings.
 
+## Armor Mastery
+
+The Armor Mastery effect is special. It essentially creates a new pool of stackable temporary hit points and displays it using the normal temporary hit points field on the character sheet. If another effect grants temporary hit points, these are added on top and tracked separately. The Armor Mastery pool is always the last one to be deduced from, and whenever the character takes a short/long rest and the Armor Mastery pool of temporary HP is not full, a prompt in chat will ask the player if they want to spend the resources to recover back to full, with the amount missing.
+
+For example, consider a character with a set of full plate armor (18AC) and with the Armor Mastery effect granting the associated 27 pool of temporary HP. Later, Heroism is cast on them, granting an additional 4 temporary HP. The character sheet will now display 31 temporary HP. During combat, the character took 10 points of damage, reducing their temporary HP down to 21. The party then takes a short rest, and the player controlling that character is then asked if they want to spend resources to recover 6 temporary HP from Armor Mastery (10 total damage - 4 heroism temporary HP = 6 armor mastery temporary HP lost).
+
+Please note that if the amount of temporary HP is reduced by mistake, the player should track the Armor Mastery temporary HP as it is not possible to undo damage to Armor Mastery temporary HP at this point in the UI/chat or ask me to fix the issue (a command will have to be executed in the browser console).
+
+My [BetterCombatDamage](https://github.com/Regateiro/BetterCombatDamage) module is now required so that the Armor Mastery pool of temporary hit points is updated when taking damage.
+
 ## Future Module Features
 
 In the future, support for effects similar to the ones already supported but that only trigger on a failed save each turn will be implemented. This will most likely require the player to roll the saving throw and then click on a button in chat indicating if the saving throw was a success or a failure.
