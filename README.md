@@ -34,6 +34,7 @@ The list of supported effects/conditions is shown in the table below.
 | Reduce               | -1d4 to weapon damage - token size              | No                     | /mae reduce                    |                   |
 | Regenerate           | +X healing at the start of turn                 | Yes (10)               | /mae regenerate \<X\>          | regen             |
 | Searing Smite        | +1d6 damage at the start of turn on failed save | No                     | /mae searing-smite             | sm                |
+| Synaptic Static      | -1d6 to attacks and ability checks              | No                     | /mae synaptic-static           | ss                |
 | Tasha's Caustic Brew | +X damage at the start of turn                  | Yes (2d4)              | /mae tashas-caustic-brew \<X\> | caustic-brew, tcb |
 | Vitriolic Sphere     | +X damage at the end of turn                    | Yes (5d4)              | /mae vitriolic-sphere \<X\>    | vsphere, vs       |
 | Voracious Poison     | +16d8 damage at the end of turn on failed save  | No                     | /mae voracious-poison          | vpoison, vp       |
