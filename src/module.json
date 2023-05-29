@@ -10,7 +10,7 @@
         }
     ],
     "url": "https://github.com/Regateiro/MorbyActiveEffects/tree/master",
-    "version": "0.3.4",
+    "version": "0.3.5",
     "compatibility": {
         "minimum": "10.291",
         "verified": "10"
@@ -24,7 +24,7 @@
                 "id": "dnd5e",
                 "compatibility": {
                     "minimum": "2.1.1",
-                    "verified": "2.1.5"
+                    "verified": "2.2.1"
                 }
             }
         ],

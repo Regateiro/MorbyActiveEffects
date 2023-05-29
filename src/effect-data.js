@@ -274,6 +274,20 @@ const _EFFECT_INFO = {
         seconds: 60,
         toChatMessage: function () { return _toChatMessage("searing-smite", `engulfed in flames, taking 1d6 fire damage on a failed CON save each turn`); }
     },
+    "synaptic-static": {
+        id: "synaptic-static",
+        name: "Synaptic Static",
+        icon: "icons/magic/lightning/bolts-strike-salvo-blue.webp",
+        commands: "synaptic-static | ss",
+        changes: [
+            {key: "flags.mae.synapticstatic", value: "1", mode: EFFECT_MODE.ADD},
+            {key: "system.bonuses.All-Attacks", value: "-1d6", mode: EFFECT_MODE.ADD},
+            {key: "system.bonuses.abilities.check", value: "-1d6", mode: EFFECT_MODE.ADD}
+        ],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function () { return _toChatMessage("synaptic-static", `suffering from muddled thoughts, hindering attack rolls and ability checks by -1d6 (concentration saving throws must be handled manually)`); }
+    },
     "tashas-caustic-brew": {
         id: "tashas-caustic-brew",
         name: "Tasha's Caustic Brew",
@@ -378,6 +392,8 @@ export const EFFECTS = {
     "regenerate": _EFFECT_INFO["regenerate"],
     "sm": _EFFECT_INFO["searing-smite"],
     "searing-smite": _EFFECT_INFO["searing-smite"],
+    "ss": _EFFECT_INFO["synaptic-static"],
+    "synaptic-static": _EFFECT_INFO["synaptic-static"],
     "tcb": _EFFECT_INFO["tashas-caustic-brew"],
     "caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
     "tashas-caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],

@@ -112,7 +112,7 @@ Hooks.on("createActor", (actor) => {
         IAESettings.manager.ensureFlags([actor]).then(() => {
             console.info(`ishiir-active-effects | Finished creating flags for actor ${actor._id}.`);
         });
-    }
+    };
 });
 
 /**
@@ -165,5 +165,5 @@ Hooks.on("targetToken", (user, token, targeted) => {
         } else {
             delete targetedTokens[token.id];
         };
-    }
+    };
 });

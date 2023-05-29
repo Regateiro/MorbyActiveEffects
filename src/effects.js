@@ -90,6 +90,9 @@ export async function handleTurnEndEffects(combat) {
     if(actor.flags?.mae?.weird) {
         await requestSave(combatant._id, actor.flags.mae.weird, "WIS", "Weird");
     };
+    if(actor.flags?.mae?.synapticstatic) {
+        await requestSave(combatant._id, "", "INT", "Synaptic Static");
+    };
     if(actor.flags?.mae?.rbreak) {
         await requestSave(combatant._id, "", "WIS", "Reality Break");
     };
@@ -243,7 +246,7 @@ async function requestSave(combatantId, formula, save, effectName, timestamp, re
     const success = `<button class='mae-save-success' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
     const fail = `<button class='mae-save-failure' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
-    await ChatMessage.create({content: `${actor.name} must roll a ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
+    await ChatMessage.create({content: `${actor.name} must roll a(n) ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
 };
 
 /**
