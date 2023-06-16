@@ -72,6 +72,9 @@ export async function handleTurnEndEffects(combat) {
         await applyDamage(actorUpdates, combatant._id, actor.flags.mae.vsphere, "Vitriolic Sphere");
         await effectsAPI.removeEffectOnToken(combatant.tokenId, "Vitriolic Sphere");
     };
+    if(actor.flags?.mae?.lacerated) {
+        await requestSave(combatant._id, actor.flags.mae.lacerated, "CON", "being lacerated");
+    };
     if(actor.flags?.mae?.bloodboil) {
         await requestSave(combatant._id, actor.flags.mae.bloodboil, "CON", "Blood Boil");
     };
