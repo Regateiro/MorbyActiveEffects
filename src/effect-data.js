@@ -45,7 +45,7 @@ const _EFFECT_INFO = {
     "barkskin": {
         id: "barkskin",
         name: "Barkskin",
-        icon: "icons/magic/nature/barrier-shield-wood-vines.webp",
+        icon: "icons/svg/aura.svg",
         commands: "barkskin | bark",
         changes: [{key: "system.attributes.ac.value", value: "16", mode: EFFECT_MODE.UPGRADE}],
         locked: true,
@@ -68,7 +68,7 @@ const _EFFECT_INFO = {
     "blood-boil": {
         id: "blood-boil",
         name: "Blood Boil",
-        icon: "icons/magic/death/skull-weapon-staff-glow-pink.webp",
+        icon: "icons/svg/fire.svg",
         commands: "blood-boil | bb",
         changes: [{key: "flags.mae.bloodboil", value: "7d6", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -78,7 +78,7 @@ const _EFFECT_INFO = {
     "confusion": {
         id: "confusion",
         name: "Confusion",
-        icon: "icons/creatures/amphibians/frog-confused-green-blue.webp",
+        icon: "icons/svg/stoned.svg",
         commands: "confusion",
         changes: [{key: "flags.mae.confusion", value: "1", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -164,7 +164,7 @@ const _EFFECT_INFO = {
     "immolation": {
         id: "immolation",
         name: "Immolation",
-        icon: "icons/magic/death/projectile-skull-fire-orange.webp",
+        icon: "icons/svg/fire.svg",
         commands: "immolation | im",
         changes: [{key: "flags.mae.immolation", value: "6d6", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -174,7 +174,7 @@ const _EFFECT_INFO = {
     "initiative-bonus": {
         id: "initiative-bonus",
         name: "Initiative Bonus",
-        icon: "icons/skills/movement/arrows-up-trio-red.webp",
+        icon: "icons/svg/upgrade.svg",
         commands: "initiative-bonus | init-bonus | ib",
         changes: [{key: "flags.mae.initBonus", value: "1d8", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -185,7 +185,7 @@ const _EFFECT_INFO = {
     "killing-winds": {
         id: "killing-winds",
         name: "Killing Winds",
-        icon: "icons/magic/death/projectile-skull-fire-green.webp",
+        icon: "icons/svg/acid.svg",
         commands: "killing-winds | kw",
         changes: [{key: "flags.mae.killingwinds", value: "4d12", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -195,7 +195,7 @@ const _EFFECT_INFO = {
     "lacerated": {
         id: "lacerated",
         name: "Lacerated",
-        icon: "icons/skills/wounds/injury-triple-slash-bleed.webp",
+        icon: "icons/svg/blood.svg",
         commands: "lacerated | lace",
         changes: [{key: "flags.mae.lacerated", value: "0", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -206,7 +206,7 @@ const _EFFECT_INFO = {
     "melfs-acid-arrow": {
         id: "melfs-acid-arrow",
         name: "Melf's Acid Arrow",
-        icon: "icons/skills/ranged/arrow-gem-flying-poisoned-green.webp",
+        icon: "icons/svg/acid.svg",
         commands: "melfs-acid-arrow | acid-arrow | maa",
         changes: [{key: "flags.mae.acidarrow", value: "2d4", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -217,7 +217,7 @@ const _EFFECT_INFO = {
     "phantasmal-killer": {
         id: "phantasmal-killer",
         name: "Phantasmal Killer",
-        icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/horror-eerie-3.jpg",
+        icon: "icons/svg/eye.svg",
         commands: "phantasmal-killer | pkiller | pk",
         changes: [{key: "flags.mae.pkiller", value: "6d10", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -242,7 +242,7 @@ const _EFFECT_INFO = {
     "reality-break": {
         id: "reality-break",
         name: "Reality Break",
-        icon: "icons/magic/air/wind-tornado-funnel-damage-blue.webp",
+        icon: "icons/svg/explosion.svg",
         commands: "reality-break | rbreak | rb",
         changes: [
             {key: "flags.mae.rbreak", value: "1", mode: EFFECT_MODE.ADD}
@@ -267,7 +267,7 @@ const _EFFECT_INFO = {
     "searing-smite": {
         id: "searing-smite",
         name: "Searing Smite",
-        icon: "icons/magic/fire/dagger-rune-enchant-flame-red.webp",
+        icon: "icons/svg/fire.svg",
         commands: "searing-smite | sm",
         changes: [{key: "flags.mae.searingsmite", value: "1d6", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -277,7 +277,7 @@ const _EFFECT_INFO = {
     "synaptic-static": {
         id: "synaptic-static",
         name: "Synaptic Static",
-        icon: "icons/magic/lightning/bolts-strike-salvo-blue.webp",
+        icon: "icons/svg/cowled.svg",
         commands: "synaptic-static | ss",
         changes: [
             {key: "flags.mae.synapticstatic", value: "1", mode: EFFECT_MODE.ADD},
@@ -291,7 +291,7 @@ const _EFFECT_INFO = {
     "tashas-caustic-brew": {
         id: "tashas-caustic-brew",
         name: "Tasha's Caustic Brew",
-        icon: "icons/creatures/slimes/slime-movement-dripping-pseudopods-green.webp",
+        icon: "icons/svg/acid.svg",
         commands: "tashas-caustic-brew | caustic-brew | tcb",
         changes: [{key: "flags.mae.causticbrew", value: "2d4", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -302,7 +302,7 @@ const _EFFECT_INFO = {
     "vitriolic-sphere": {
         id: "vitriolic-sphere",
         name: "Vitriolic Sphere",
-        icon: "icons/magic/acid/projectile-smoke-glowing.webp",
+        icon: "icons/svg/acid.svg",
         commands: "vitriolic-sphere | vsphere | vs",
         changes: [{key: "flags.mae.vsphere", value: "5d4", mode: EFFECT_MODE.ADD}],
         locked: false,
@@ -313,7 +313,7 @@ const _EFFECT_INFO = {
     "voracious-poison": {
         id: "voracious-poison",
         name: "Voracious Poison",
-        icon: "icons/magic/acid/dissolve-vomit-green-brown.webp",
+        icon: "icons/svg/poison.svg",
         commands: "voracious-poison | vpoison | vp",
         changes: [{key: "flags.mae.vpoison", value: "16d8", mode: EFFECT_MODE.ADD}],
         locked: true,
@@ -323,7 +323,7 @@ const _EFFECT_INFO = {
     "weird": {
         id: "weird",
         name: "Weird",
-        icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/horror-acid-3.jpg",
+        icon: "icons/svg/eye.svg",
         commands: "weird",
         changes: [{key: "flags.mae.weird", value: "11d10", mode: EFFECT_MODE.ADD}],
         locked: true,
