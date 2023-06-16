@@ -180,7 +180,7 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
     // Display Chat Message
     await roll.toMessage({ sound: null, speaker: null,
         flavor: `${actor.name} ${isTemporary ? "gains up to" : "recovers"} ${roll.total} ${isTemporary ? "temporary HP" : "HP"} from ${effectName}${extraText}!`
-    });
+    }, {rollMode: "public"});
 };
 
 /**
@@ -226,7 +226,7 @@ export async function applyDamage(actorUpdates, combatantId, formula, effectName
     // Display Chat Message
     await roll.toMessage({ sound: null, speaker: null,
         flavor: `${actor.name} suffers ${damage} points of damage from ${effectName}${extraText}!`
-    });
+    }, {rollMode: "public"});
 };
 
 /**
@@ -281,7 +281,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${actor.name} is sees a Vision of the Far Realm and is <b>stunned</b> until the end of the turn!`
-            });
+            }, {rollMode: "public"});
             await applyDamage(actorUpdates, combatantId, "6d12", "from Reality Break's Vision of the Far Realm");
             return 0;
         case 3:
@@ -290,7 +290,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${actor.name} is swallowed by a Rending Rift!`
-            });
+            }, {rollMode: "public"});
             await requestSave(combatantId, "8d12", "DEX", "Reality Break's Rending Rift", timestamp, false, true);
             return 1;
         case 6:
@@ -299,7 +299,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${actor.name} teleports up to 30 feet through a wormhole and is knocked <b>prone</b>!`
-            });
+            }, {rollMode: "public"});
             await applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Wormhole");
             return 0;
         case 9:
@@ -307,7 +307,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${actor.name} chilled by the Dark Void and is <b>blinded</b> until the end of the turn!`
-            });
+            }, {rollMode: "public"});
             await applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Dark Void");
     };
     return 0;
@@ -328,14 +328,14 @@ async function handleConfusion(combatantId) {
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Confusion: ${actor.name} uses all its movement to move in a random direction. The creature doesn't take an action this turn!`
-            });
+            }, {rollMode: "public"});
 
             const directions = ["North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"];
             const dirRoll = new Roll("1d8");
             await dirRoll.evaluate({async: true});
             await dirRoll.toMessage({ sound: null, speaker: null,
                 flavor: `Confusion: ${actor.name} uses all its movement to move <b>${directions[dirRoll.total - 1]}</b>!`
-            });
+            }, {rollMode: "public"});
             break;
         case 2:
         case 3:
@@ -345,21 +345,21 @@ async function handleConfusion(combatantId) {
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Confusion: ${actor.name} doesn't move or take actions this turn!`
-            });
+            }, {rollMode: "public"});
             break;
         case 7:
         case 8:
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Confusion: ${actor.name} uses its action to make a melee attack against a randomly determined creature within its reach. If there is no creature within its reach, they do nothing this turn!`
-            });
+            }, {rollMode: "public"});
             break;
         case 9:
         case 10:
             // Display Chat Message
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Confusion: ${actor.name} can act and move normally!!`
-            });
+            }, {rollMode: "public"});
     };
 }
 
