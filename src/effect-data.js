@@ -22,7 +22,7 @@ const _EFFECT_INFO = {
         icon: "https://assets.forge-vtt.com/bazaar/systems/dnd5e/assets/icons/spells/heal-sky-1.jpg",
         commands: "aid",
         changes: [
-            {key: "system.attributes.hp.tempmax", value: "5", mode: EFFECT_MODE.ADD}
+            {key: "system.attributes.hp.tempmax", value: "+5", mode: EFFECT_MODE.ADD}
         ],
         locked: false,
         seconds: 60,
@@ -58,8 +58,8 @@ const _EFFECT_INFO = {
         icon: "icons/svg/angel.svg",
         commands: "bless",
         changes: [
-            {key: "system.bonuses.All-Attacks", value: "1d4", mode: EFFECT_MODE.ADD},
-            {key: "system.bonuses.abilities.save", value: "1d4", mode: EFFECT_MODE.ADD}
+            {key: "system.bonuses.All-Attacks", value: "+1d4", mode: EFFECT_MODE.ADD},
+            {key: "system.bonuses.abilities.save", value: "+1d4", mode: EFFECT_MODE.ADD}
         ],
         locked: true,
         seconds: 60,
@@ -90,7 +90,7 @@ const _EFFECT_INFO = {
         name: "Divine Favor",
         icon: "icons/magic/fire/dagger-rune-enchant-blue-gray.webp",
         commands: "divine-favor | df",
-        changes: [{key: "system.bonuses.weapon.damage", value: "1d4", mode: EFFECT_MODE.ADD}],
+        changes: [{key: "system.bonuses.weapon.damage", value: "+1d4", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
         toChatMessage: function () { return _toChatMessage("divine-favor", "empowered, enhancing weapon attacks with an extra 1d4 radiant damage"); }
@@ -103,7 +103,7 @@ const _EFFECT_INFO = {
         changes: [
             {key: "ATL.width", value: null, mode: EFFECT_MODE.ADD},
             {key: "ATL.height", value: null, mode: EFFECT_MODE.ADD},
-            {key: "system.bonuses.weapon.damage", value: "1d4", mode: EFFECT_MODE.ADD},
+            {key: "system.bonuses.weapon.damage", value: "+1d4", mode: EFFECT_MODE.ADD},
         ],
         locked: true,
         seconds: 60,
@@ -135,7 +135,7 @@ const _EFFECT_INFO = {
         name: "Guidance",
         icon: "icons/svg/stone-path.svg",
         commands: "guidance",
-        changes: [{key: "system.bonuses.abilities.check", value: "1d4", mode: EFFECT_MODE.ADD}],
+        changes: [{key: "system.bonuses.abilities.check", value: "+1d4", mode: EFFECT_MODE.ADD}],
         locked: true,
         seconds: 60,
         toChatMessage: function () { return _toChatMessage("guidance", "guided, gaining a 1d4 to skill checks"); }
