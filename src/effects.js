@@ -41,10 +41,18 @@ export async function handleTurnStartEffects(combat) {
     if(actor.flags?.mae?.regenerate) {
         if(saveRequests == 0) {
             await applyHP(actorUpdates, combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
+            if(actor.flags?.mae?.lacerated) {
+                await effectsAPI.removeEffectOnToken(combatant.tokenId, "Lacerated");
+            };
         } else {
             pendingTriggers[timestamp] = {
                 "saveRequests": saveRequests,
-                "trigger": async function(au) { await applyHP(au, combatant._id, false, actor.flags.mae.regenerate, "Regenerate"); }
+                "trigger": async function(au) { 
+                    await applyHP(au, combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
+                    if(actor.flags?.mae?.lacerated) {
+                        await effectsAPI.removeEffectOnToken(combatant.tokenId, "Lacerated");
+                    };
+                }
             };
         };
     };
