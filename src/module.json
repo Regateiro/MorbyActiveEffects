@@ -71,7 +71,7 @@
                 "manifest": "https://raw.githubusercontent.com/Regateiro/BetterCombatDamage/master/bettercombatdamage/module.json",
                 "compatibility": {
                     "minimum": "1.2.4",
-                    "verified": "1.2.4"
+                    "verified": "1.3.1"
                 }
             }
         ]
