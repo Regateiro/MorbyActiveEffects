@@ -120,6 +120,17 @@ const _EFFECT_INFO = {
         help: "Damage to apply at the start of turn. Defaults to 1d6.",
         toChatMessage: function (value) { return _toChatMessage("ensnaring-strike", `being pierced by thorns and taking ${value || "1d6"} piercing damage every turn`, value); }
     },
+    "gash": {
+        id: "gashed",
+        name: "Gashed",
+        icon: "icons/skills/wounds/injury-stapled-flesh-tan.webp",
+        commands: "gash",
+        changes: [{key: "flags.mae.gashed", value: "0", mode: EFFECT_MODE.ADD}],
+        locked: false,
+        seconds: 60,
+        help: "Damage to apply at the start of turn. Defaults to 0.",
+        toChatMessage: function (value) { return _toChatMessage("gashed", `gashed, bleeding for ${value || "0"} damage every turn`, value); }
+    },
     "gift-of-alacrity": {
         id: "gift-of-alacrity",
         name: "Gift of Alacrity",
@@ -363,6 +374,7 @@ export const EFFECTS = {
     "enlarge": _EFFECT_INFO["enlarge"],
     "ensnaring-strike": _EFFECT_INFO["ensnaring-strike"],
     "es": _EFFECT_INFO["ensnaring-strike"],
+    "gash": _EFFECT_INFO["gash"],
     "goa": _EFFECT_INFO["gift-of-alacrity"],
     "gift-of-alacrity": _EFFECT_INFO["gift-of-alacrity"],
     "guidance": _EFFECT_INFO["guidance"],

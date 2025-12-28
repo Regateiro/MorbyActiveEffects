@@ -22,6 +22,9 @@ export async function handleTurnStartEffects(combat) {
     if(actor.flags?.mae?.lacerated) {
         await applyDamage(actorUpdates, combatant._id, actor.flags.mae.lacerated, "being lacerated");
     };
+    if(actor.flags?.mae?.gashed) {
+        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.gashed, "being gashed");
+    };
     if(actor.flags?.mae?.estrike) {
         await applyDamage(actorUpdates, combatant._id, actor.flags.mae.estrike, "Ensnaring Strike");
     };
@@ -74,6 +77,9 @@ export async function handleTurnEndEffects(combat) {
     };
     if(actor.flags?.mae?.lacerated) {
         await requestSave(combatant._id, "", "CON", "Lacerated");
+    };
+    if(actor.flags?.mae?.gashed) {
+        await requestSave(combatant._id, "", "CON", "Gashed");
     };
     if(actor.flags?.mae?.bloodboil) {
         await requestSave(combatant._id, actor.flags.mae.bloodboil, "CON", "Blood Boil");
