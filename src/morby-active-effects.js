@@ -18,6 +18,13 @@ Hooks.once("ready", () => {
     $(document).on('click', '.mae-apply-effect', async function () {
         await applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value'));
     });
+    // Bind save roll buttons to the callback
+    $(document).on('click', '.mae-save-roll', async function () {
+        const combatant = game.combat.combatants.get($(this).data('combatant-id'));
+        const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+        const abilityId = $(this).data('ability-id');
+        await actor.rollAbilitySave(abilityId.toLowerCase());
+    });
     // Bind save success buttons to the callback
     $(document).on('click', '.mae-save-success', async function () {
         const combatant = game.combat.combatants.get($(this).data('combatant-id'));

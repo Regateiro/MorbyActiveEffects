@@ -258,10 +258,11 @@ export async function applyDamage(actorUpdates, combatantId, formula, effectName
 async function requestSave(combatantId, formula, save, effectName, timestamp, removeOnSave = true, halfDamage = false) {
     const combatant = game.combat.combatants.get(combatantId);
     // Define the buttons
+    const roll = `<button class='mae-save-roll' data-combatant-id='${combatantId}' data-ability-id='${save}'><i class="fas fa-dice-d20"></i>Roll ${save} Save</button>`;
     const success = `<button class='mae-save-success' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-remove='${removeOnSave}' data-half-damage='${halfDamage}' data-timestamp='${timestamp}'><i class="fas fa-check"></i>Success</button>`;
     const fail = `<button class='mae-save-failure' data-combatant-id='${combatantId}' data-effect-name='${effectName}' data-effect-formula='${formula}' data-timestamp='${timestamp}'><i class="fas fa-xmark"></i>Failure</button>`;
     // Print the message
-    await ChatMessage.create({content: `${combatant.name} must roll a(n) ${save} save against ${effectName}. ${success} ${fail}`, whisper: game.userId});
+    await ChatMessage.create({content: `${combatant.name} must roll a(n) ${save} save against ${effectName}. <hr/> ${roll} <hr/> ${success} ${fail}`, whisper: game.userId});
 };
 
 /**
