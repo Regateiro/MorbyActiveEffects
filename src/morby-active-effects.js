@@ -110,18 +110,6 @@ Hooks.on("chatCommandsReady", commands => {
     cm_register(commands);
 });
 
-
-/**
- * Ensure flags on actor creation.
- */
-Hooks.on("createActor", (actor) => {
-    if(actor?.isOwner) {
-        IAESettings.manager.ensureFlags([actor]).then(() => {
-            console.info(`ishiir-active-effects | Finished creating flags for actor ${actor._id}.`);
-        });
-    };
-});
-
 /**
  * Allow dynamic bonuses to be applies to initiative
  */
