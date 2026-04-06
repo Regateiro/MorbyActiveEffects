@@ -51,23 +51,6 @@ async function handleCommand(chat, parameters, messageData) {
                 await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
             };
         };
-    } else if (parameters[0] == "amthp") {
-        for (const token of Object.values(targetedTokens)) {
-            let amTempHP = token.actor.flags.mae.tempArmorMastery;
-            let tempHP = token.actor.system.attributes.hp.temp - amTempHP;
-
-            // If a new armor mastery value is provided, update it (0 < newValue < maxValue)
-            if(Boolean(parameters[1])) {
-                amTempHP = Math.max(Math.min(Number(parameters[1]), token.actor.flags.mae.armorMastery), 0);
-                await token.actor.update({"flags.mae.tempArmorMastery": amTempHP});
-                await token.actor.update({"system.attributes.hp.temp": amTempHP + tempHP});
-            };
-
-            // Display the current temporary HP details of the target
-            await ChatMessage.create({
-                content: `${token.name} has ${amTempHP}/${token.actor.flags.mae.armorMastery} temp HP from armor mastery and ${tempHP} temp HP from other sources!`
-            });
-        };
     };
 
     return {};
@@ -98,14 +81,7 @@ export async function applyEffectToAllTargets(effectId, value) {
         await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
         // If the effect is Aid, heal the target as well on application
         if (effectInfo.id == "aid") {
-            await token.actor.update({"system.attributes.hp.value": (token.actor.system.attributes.hp.value + (Number(value) || 5))});
-        // If the effect is armor mastery, set the current armor mastery pool to the value set
-        } else if (effectInfo.id == "armor-mastery") {
-            let amTempHP = token?.actor?.flags?.mae?.tempArmorMastery || 0;
-            let tempHP = token.actor.system.attributes.hp.temp - amTempHP;
-            amTempHP = Number(value) || 0;
-            await token.actor.update({"flags.mae.tempArmorMastery": amTempHP});
-            await token.actor.update({"system.attributes.hp.temp": amTempHP + tempHP});
+            await token.actor.applyDamage(-Number(value));
         };
     };
 };

@@ -1,9 +1,15 @@
-import { effectsAPI, preLongRestArmorMastery } from "./morby-active-effects.js";
+import { effectsAPI } from "./morby-active-effects.js";
 
 /**
  * Triggers waiting for save request resolution
  */
 let pendingTriggers = {};
+
+/**
+ * Damage and temp HP to be applied at the end of the current processing
+ *   to avoid multiple applications of the same effect in one turn from stacking incorrectly
+ */
+let damage = 0;
 
 /**
  * Process all applicable turn start effects and begin processing
@@ -12,27 +18,29 @@ let pendingTriggers = {};
 export async function handleTurnStartEffects(combat) {
     const combatant = combat.combatants.get(combat.current.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = await generateActorUpdatesFromCombatant(combatant._id);
+
+    // Reset damage to be applied at the end of the processing
+    damage = 0;
 
     let saveRequests = 0;
     const timestamp = String(Date.now());
     if(actor.flags?.mae?.heroismTempHP) {
-        await applyHP(actorUpdates, combatant._id, true, actor.flags.mae.heroismTempHP, "Heroism");
+        await applyHP(combatant._id, true, actor.flags.mae.heroismTempHP, "Heroism");
     };
     if(actor.flags?.mae?.lacerated) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.lacerated, "being lacerated");
+        await applyDamage(combatant._id, actor.flags.mae.lacerated, "being lacerated");
     };
     if(actor.flags?.mae?.gashed) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.gashed, "being gashed");
+        await applyDamage(combatant._id, actor.flags.mae.gashed, "being gashed");
     };
     if(actor.flags?.mae?.estrike) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.estrike, "Ensnaring Strike");
+        await applyDamage(combatant._id, actor.flags.mae.estrike, "Ensnaring Strike");
     };
     if(actor.flags?.mae?.causticbrew) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.causticbrew, "Tasha's Caustic Brew");
+        await applyDamage(combatant._id, actor.flags.mae.causticbrew, "Tasha's Caustic Brew");
     };
     if(actor.flags?.mae?.rbreak) {
-        saveRequests += await handleRealityBreak(actorUpdates, combatant._id, timestamp);
+        saveRequests += await handleRealityBreak(combatant._id, timestamp);
     };
     if(actor.flags?.mae?.confusion) {
         await handleConfusion(combatant._id);
@@ -43,15 +51,15 @@ export async function handleTurnStartEffects(combat) {
     };
     if(actor.flags?.mae?.regenerate) {
         if(saveRequests == 0) {
-            await applyHP(actorUpdates, combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
+            await applyHP(combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
             if(actor.flags?.mae?.lacerated) {
                 await effectsAPI.removeEffectOnToken(combatant.tokenId, "Lacerated");
             };
         } else {
             pendingTriggers[timestamp] = {
                 "saveRequests": saveRequests,
-                "trigger": async function(au) { 
-                    await applyHP(au, combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
+                "trigger": async function() {
+                    await applyHP(combatant._id, false, actor.flags.mae.regenerate, "Regenerate");
                     if(actor.flags?.mae?.lacerated) {
                         await effectsAPI.removeEffectOnToken(combatant.tokenId, "Lacerated");
                     };
@@ -60,7 +68,10 @@ export async function handleTurnStartEffects(combat) {
         };
     };
 
-    await actor.update(actorUpdates);
+    // Apply any damage that was delayed to be applied at the end of the turn
+    if (damage > 0) {
+        await actor.applyDamage(damage);
+    };
 };
 
 /**
@@ -70,17 +81,19 @@ export async function handleTurnStartEffects(combat) {
 export async function handleTurnEndEffects(combat) {
     const combatant = combat.combatants.get(combat.previous.combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    let actorUpdates = await generateActorUpdatesFromCombatant(combatant._id);
+
+    // Reset damage to be applied at the end of the processing
+    damage = 0;
 
     if(actor.flags?.mae?.idinsinuation) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.idinsinuation, "Id Insinuation");
+        await applyDamage(combatant._id, actor.flags.mae.idinsinuation, "Id Insinuation");
     };
     if(actor.flags?.mae?.acidarrow) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.acidarrow, "Melf's Acid Arrow");
+        await applyDamage(combatant._id, actor.flags.mae.acidarrow, "Melf's Acid Arrow");
         await effectsAPI.removeEffectOnToken(combatant.tokenId, "Melf's Acid Arrow");
     };
     if(actor.flags?.mae?.vsphere) {
-        await applyDamage(actorUpdates, combatant._id, actor.flags.mae.vsphere, "Vitriolic Sphere");
+        await applyDamage(combatant._id, actor.flags.mae.vsphere, "Vitriolic Sphere");
         await effectsAPI.removeEffectOnToken(combatant.tokenId, "Vitriolic Sphere");
     };
     if(actor.flags?.mae?.lacerated) {
@@ -117,60 +130,20 @@ export async function handleTurnEndEffects(combat) {
         await requestSave(combatant._id, "", "WIS", "Confusion");
     };
 
-    await actor.update(actorUpdates);
-};
-
-export async function handleRestEffects(actor, isLongRest) {
-    const actorUpdates = await generateActorUpdatesFromActor(actor);
-
-    if(actor.flags?.mae?.armorMastery) {
-        if (isLongRest) {
-            // Make sure the armor tempHP stays after a long rest
-            actorUpdates["system.attributes.hp.temp"] = preLongRestArmorMastery[actor._id];
-            actorUpdates["flags.mae.tempArmorMastery"] = preLongRestArmorMastery[actor._id];
-        }
-        const diff = actor.flags.mae.armorMastery - actorUpdates["system.attributes.hp.temp"];
-        if (diff > 0) {
-            await requestArmorMasteryRestoration(actor, diff);
-        }
-    };
-
-    await actor.update(actorUpdates);
-};
-
-/**
- * Generates a new actorUpdates variable from a combatant
- * @param {String} combatantId The id of the combatant
- * @returns An object with current actor values
- */
-export async function generateActorUpdatesFromCombatant(combatantId) {
-    const combatant = game.combat.combatants.get(combatantId);
-    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    return await generateActorUpdatesFromActor(actor);
-};
-
-/**
- * Generates a new actorUpdates variable from an actor
- * @param {Actor5e} actor The id of the combatant
- * @returns An object with current actor values
- */
-export async function generateActorUpdatesFromActor(actor) {
-    return {
-        "system.attributes.hp.value": Number(actor.system.attributes.hp.value),
-        "system.attributes.hp.temp": Number(actor.system.attributes.hp.temp),
-        "flags.mae.tempArmorMastery": Number(actor.flags.mae.tempArmorMastery)
+    // Apply any damage that was delayed to be applied at the end of the turn
+    if (damage > 0) {
+        await actor.applyDamage(damage);
     };
 };
 
 /**
  * Apply HP to the actor.
- * @param {Object} actorUpdates An object with the current HP values of the actor
  * @param {String} combatantId The id of the combatant
  * @param {Boolean} isTemporary Whether the HP to be applied is temporary or not
  * @param {String} formula The formula to calculate the HP restored from
  * @param {String} effectName The name of the effect triggering this HP recovery
  */
-async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectName) {
+async function applyHP(combatantId, isTemporary, formula, effectName) {
     const combatant = game.combat.combatants.get(combatantId);
     const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
     const roll = new Roll(String(formula));
@@ -178,20 +151,19 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
 
     let extraText = "";
     if (isTemporary) {
-        // Apply tempHP if it is higher than the current amount
-        if(actorUpdates["system.attributes.hp.temp"] < actorUpdates["flags.mae.tempArmorMastery"] + roll.total) {
-            actorUpdates["system.attributes.hp.temp"] = actorUpdates["flags.mae.tempArmorMastery"] + roll.total;
-        } else {
-            extraText = `, but they still have ${actorUpdates["system.attributes.hp.temp"] - actorUpdates["flags.mae.tempArmorMastery"]} unstackable temporary HP`;
+        // If the actor already had temporary HP, specify how much they have after applying this effect
+        if(actor.system.attributes.hp.temp > roll.total) {
+            extraText = `, but they still have ${actor.system.attributes.hp.temp} temporary HP`;
         };
+        // Apply temporary HP
+        await actor.applyTempHP(roll.total);
     } else {
-        if (actorUpdates["system.attributes.hp.value"] == 0 && roll.total > 0) {
+        // If the actor is being healed from 0 HP, specify that they are no longer dying
+        if (actor.system.attributes.hp.value == 0 && roll.total > 0) {
             extraText = ` while at 0HP and is <b>no longer dying</b>`;
         }
-        actorUpdates["system.attributes.hp.value"] = Math.min(
-            actorUpdates["system.attributes.hp.value"] + roll.total, 
-            Number(actor.system.attributes.hp.max) + Number(actor.system.attributes.hp.tempmax)
-        );
+        // Apply healing
+        damage -= roll.total;
     };
 
     // Display Chat Message
@@ -202,46 +174,26 @@ async function applyHP(actorUpdates, combatantId, isTemporary, formula, effectNa
 
 /**
  * Apply damage to the actor.
- * @param {Object} actorUpdates An object with the current HP values of the actor
  * @param {String} combatantId The id of the combatant
  * @param {String} formula The formula to calculate the HP restored from
  * @param {String} effectName The name of the effect triggering this damage
  * @param {Boolean} halfDamage Whether damage applied should be cut in half
  */
-export async function applyDamage(actorUpdates, combatantId, formula, effectName, halfDamage = false) {
+export async function applyDamage(combatantId, formula, effectName, halfDamage = false) {
+    // If there is no formula, do nothing
     if (!formula) return;
 
+    // Calculate damage
     const combatant = game.combat.combatants.get(combatantId);
     const roll = new Roll(String(formula));
     await roll.evaluate({async: true});
 
-    let damage = roll.total;
-    if (halfDamage) {
-        damage = Math.floor(roll.total / 2);
-    };
-
-    // Calculate new HP values
-    const tempHP = actorUpdates["system.attributes.hp.temp"];
-    const newTempHP = Math.max(tempHP - damage, 0);
-    const HP = actorUpdates["system.attributes.hp.value"];
-    const newHP = Math.max(HP - Math.max(damage - tempHP, 0), 0);
-
-    // Warn if the HP reached 0
-    let extraText = "";
-    if(HP > 0 && newHP == 0) {
-        extraText = ` while at ${HP}HP and is now <b>dying</b>`;
-    } else if (newHP == 0) {
-        extraText = ` while <b>dying</b>`;
-    };
-
-    // Apply HP
-    actorUpdates["system.attributes.hp.temp"] = newTempHP;
-    actorUpdates["system.attributes.hp.value"] = newHP;
-
+    // Apply damage
+        damage += roll.total;
 
     // Display Chat Message
     await roll.toMessage({ sound: null, speaker: null,
-        flavor: `${combatant.name} suffers ${damage} points of damage from ${effectName}${extraText}!`
+        flavor: `${combatant.name} suffers ${roll.total} points of damage from ${effectName}!`
     }, {rollMode: "public"});
 };
 
@@ -266,26 +218,12 @@ async function requestSave(combatantId, formula, save, effectName, timestamp, re
 };
 
 /**
- * Prompt the user with a question
- * @param {Actor5e} actor The actor
- * @param {Number} diff The difference in temp HP to restore
- */
-async function requestArmorMasteryRestoration(actor, diff) {
-    // Define the buttons
-    const yes = `<button class='mae-am-yes' data-actor-id='${actor._id}'><i class="fas fa-check"></i>Yes</button>`;
-    const no = `<button class='mae-am-no' data-actor-id='${actor._id}'><i class="fas fa-xmark"></i>No</button>`;
-    // Print the message
-    await ChatMessage.create({content: `${actor.name}'s Armor Mastery is missing ${diff} temporary HP. Restore? ${yes} ${no}`, whisper: game.userId});
-};
-
-/**
  * Handle Reality Break roll table
- * @param {Object} actorUpdates An object with the current HP values of the actor
  * @param {String} combatantId The id of the combatant
  * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
- * @returns 
+ * @returns
  */
-async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
+async function handleRealityBreak(combatantId, timestamp) {
     const combatant = game.combat.combatants.get(combatantId);
     const roll = new Roll("1d10");
     await roll.evaluate({async: true});
@@ -297,7 +235,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${combatant.name} is sees a Vision of the Far Realm and is <b>stunned</b> until the end of the turn!`
             }, {rollMode: "public"});
-            await applyDamage(actorUpdates, combatantId, "6d12", "from Reality Break's Vision of the Far Realm");
+            await applyDamage(combatantId, "6d12", "from Reality Break's Vision of the Far Realm");
             return 0;
         case 3:
         case 4:
@@ -315,7 +253,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${combatant.name} teleports up to 30 feet through a wormhole and is knocked <b>prone</b>!`
             }, {rollMode: "public"});
-            await applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Wormhole");
+            await applyDamage(combatantId, "10d12", "from Reality Break's Wormhole");
             return 0;
         case 9:
         case 10:
@@ -323,7 +261,7 @@ async function handleRealityBreak(actorUpdates, combatantId, timestamp) {
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${combatant.name} chilled by the Dark Void and is <b>blinded</b> until the end of the turn!`
             }, {rollMode: "public"});
-            await applyDamage(actorUpdates, combatantId, "10d12", "from Reality Break's Dark Void");
+            await applyDamage(combatantId, "10d12", "from Reality Break's Dark Void");
     };
     return 0;
 };
@@ -379,10 +317,9 @@ async function handleConfusion(combatantId) {
 
 /**
  * Resolves one save request and triggers pending functions
- * @param {Object} actorUpdates An object with the current HP values of the actor
  * @param {String} timestamp The timestamp of this request, so waiting triggers can happen after it's resolved
  */
-export async function handleResolvedSaveRequest(actorUpdates, timestamp) {
+export async function handleResolvedSaveRequest(timestamp) {
     // If there are any pending triggers on this timestamp
     if (pendingTriggers[timestamp]) {
         // Decrements the number of save requests the triggers are waiting on
@@ -390,7 +327,7 @@ export async function handleResolvedSaveRequest(actorUpdates, timestamp) {
         // If the last save request has been resolved
         if (pendingTriggers[timestamp]["saveRequests"] == 0) {
             // Call the trigger
-            pendingTriggers[timestamp]["trigger"](actorUpdates);
+            pendingTriggers[timestamp]["trigger"]();
             // Delete the pending trigger information
             delete pendingTriggers[timestamp];
         };
