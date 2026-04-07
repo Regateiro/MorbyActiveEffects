@@ -68,6 +68,7 @@ export async function applyEffectToAllTargets(effectId, value) {
         await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
         // Create a new effect
         const effect = await effectsAPI.buildDefault(null, effectInfo.name, effectInfo.icon);
+        effect.origin = `Actor.${token.document.actorId}`;
         effect.isTemporary = Boolean(effectInfo.seconds);
         effect.seconds = effectInfo.seconds;
         effect.turns = null;
