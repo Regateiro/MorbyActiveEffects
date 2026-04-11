@@ -156,11 +156,6 @@ function handleAutoComplete(menu, alias, parameters) {
             entries.push(game.chatCommands.createSeparatorElement());
         }
         // If the first parameter is matching the start of the clear command
-        if("amthp".startsWith(parameters[0])) {
-            // Add clear as a possible command to the autocompletion
-            entries.push(game.chatCommands.createInfoElement("amthp - show armor mastery temporary HP"));
-        };
-        // If the first parameter is matching the start of the clear command
         if("clear".startsWith(parameters[0])) {
             // Add clear as a possible command to the autocompletion
             entries.push(game.chatCommands.createInfoElement("clear - remove effect from token"));
@@ -176,10 +171,6 @@ function handleAutoComplete(menu, alias, parameters) {
                         entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
                     };
                 });
-                break;
-            case "amthp":
-                // Add all the effect entries that match the start of the second parameter
-                entries.push(game.chatCommands.createInfoElement("Value to set armor mastery temporary HP to."));
                 break;
             default:
                 // Otherwise, add the help description of the effect specified in the first parameter

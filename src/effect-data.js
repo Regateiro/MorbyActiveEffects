@@ -141,6 +141,19 @@ const _EFFECT_INFO = {
         seconds: 60*60*8,
         toChatMessage: function () { return _toChatMessage("gift-of-alacrity", "gifted with alacrity, granting a 1d8 bonus to initiative"); }
     },
+    "greater-malison": {
+        id: "greater-malison",
+        name: "Greater Malison",
+        icon: "icons/svg/sun.svg",
+        commands: "greater-malison | gm",
+        changes: [
+            {key: "flags.mae.greaterMalison", value: "1", mode: EFFECT_MODE.ADD},
+            {key: "system.bonuses.abilities.save", value: "-1d8", mode: EFFECT_MODE.ADD}
+        ],
+        locked: true,
+        seconds: 60,
+        toChatMessage: function () { return _toChatMessage("greater-malison", "cursed, hindering saving throws by -1d8"); }
+    },
     "guidance": {
         id: "guidance",
         name: "Guidance",
@@ -340,18 +353,6 @@ const _EFFECT_INFO = {
         locked: true,
         seconds: 60,
         toChatMessage: function () { return _toChatMessage("weird", "facing their deepest fears, taking 11d10 psychic damage on a failed WIS save each turn"); }
-    },
-    /******* Armor Mastery *******/
-    "armor-mastery": {
-        id: "armor-mastery",
-        name: "Armor Mastery",
-        icon: "icons/skills/melee/shield-block-gray-yellow.webp",
-        commands: "armor-mastery | am",
-        changes: [{key: "flags.mae.armorMastery", value: "0", mode: EFFECT_MODE.ADD}],
-        locked: false,
-        seconds: null,
-        help: "Temporary HP to add after a rest. Defaults to 0.",
-        toChatMessage: function () {}
     }
 };
 
@@ -360,8 +361,6 @@ const _EFFECT_INFO = {
  */
 export const EFFECTS = {
     "aid": _EFFECT_INFO["aid"],
-    "am": _EFFECT_INFO["armor-mastery"],
-    "armor-mastery": _EFFECT_INFO["armor-mastery"],
     "bane": _EFFECT_INFO["bane"],
     "bark": _EFFECT_INFO["barkskin"],
     "barkskin": _EFFECT_INFO["barkskin"],
@@ -377,6 +376,8 @@ export const EFFECTS = {
     "gash": _EFFECT_INFO["gash"],
     "goa": _EFFECT_INFO["gift-of-alacrity"],
     "gift-of-alacrity": _EFFECT_INFO["gift-of-alacrity"],
+    "greater-malison": _EFFECT_INFO["greater-malison"],
+    "gm": _EFFECT_INFO["greater-malison"],
     "guidance": _EFFECT_INFO["guidance"],
     "heroism": _EFFECT_INFO["heroism"],
     "ii": _EFFECT_INFO["id-insinuation"],
