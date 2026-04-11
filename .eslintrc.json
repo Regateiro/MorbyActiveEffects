@@ -1,0 +1,30 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", {"argsIgnorePattern": "^_"}],
+    "no-undef": "off",
+    "no-extra-semi": "off",
+    "no-case-declarations": "off"
+  },
+  "globals": {
+    "game": "readonly",
+    "Hooks": "readonly",
+    "canvas": "readonly",
+    "ui": "readonly",
+    "$": "readonly",
+    "Token": "readonly",
+    "Actor": "readonly",
+    "Item": "readonly",
+    "Combat": "readonly",
+    "ChatMessage": "readonly",
+    "Roll": "readonly"
+  }
+}

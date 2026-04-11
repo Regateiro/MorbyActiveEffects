@@ -25,7 +25,7 @@ export function cm_register(commands) {
  * @param {*} messageData
  * @returns
  */
-async function handleCommand(chat, parameters, messageData) {
+async function handleCommand(_chat, parameters, _messageData) {
     // Split the parameters into separate fields
     parameters = parameters.toLowerCase().split(" ");
 

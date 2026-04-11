@@ -192,7 +192,7 @@ export async function applyDamage(combatantId, formula, effectName, halfDamage =
     await roll.evaluate({async: true});
 
     // Apply damage
-        damage += roll.total;
+    damage += roll.total / (halfDamage ? 2 : 1);
 
     // Display Chat Message
     await roll.toMessage({ sound: null, speaker: null,

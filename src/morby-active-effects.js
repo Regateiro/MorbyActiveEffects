@@ -93,7 +93,7 @@ Hooks.on("dnd5e.preRollInitiative", (actor, roll) => {
 /**
  * Apply effects at the start of the turn
  */
-Hooks.on("updateCombat", (combat, turn, diff, userId) => {
+Hooks.on("updateCombat", (combat, _turn, _diff, _userId) => {
     if(game.user.isGM) {
         // Previous Turn
         handleTurnEndEffects(combat).then(() => {

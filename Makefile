@@ -1,6 +1,9 @@
 INSTALL_PATH=~/.local/share/FoundryVTT/Data/modules/morby-active-effects
 
-.PHONY: compress install
+.PHONY: compress install lint
+
+lint:
+	npx --yes eslint@8 src/ --config .eslintrc.json
 
 compress:
 	cd src/ && zip -r module.zip * && mv module.zip ../
