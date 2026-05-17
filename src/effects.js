@@ -69,7 +69,7 @@ export async function handleTurnStartEffects(combat) {
     };
 
     // Apply any damage that was delayed to be applied at the end of the turn
-    if (damage > 0) {
+    if (damage != 0) {
         await actor.applyDamage(damage);
     };
 };
