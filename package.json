@@ -1,0 +1,14 @@
+{
+  "name": "morby-active-effects",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint@8 src/ --config .eslintrc.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "vitest": "^3.1.3"
+  }
+}

@@ -1,1 +1,5 @@
 module.zip
+node_modules/
+coverage/
+.eslintcache
+*.log

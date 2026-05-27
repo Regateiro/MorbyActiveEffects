@@ -1,8 +1,6 @@
 import { targetedTokens } from "./morby-active-effects.js";
 
-/**
- * List of effect modes
- */
+/** ActiveEffect change modes as defined by Foundry VTT */
 const EFFECT_MODE = {
     CUSTOM: 0,
     MULTIPLY: 1,
@@ -13,7 +11,9 @@ const EFFECT_MODE = {
 };
 
 /**
- * Internal effect information
+ * Internal effect definitions.
+ * Each entry defines how to apply the effect (changes, duration), whether the user
+ * can override the value (locked), plus helpers for chat display and autocomplete.
  */
 const _EFFECT_INFO = {
     "aid": {
@@ -357,91 +357,36 @@ const _EFFECT_INFO = {
 };
 
 /**
- * Effect aliases to information mapping
+ * Flat alias → info mapping, auto-generated from each entry's `commands` field.
+ * e.g. commands: "barkskin | bark" creates both EFFECTS.barkskin and EFFECTS.bark.
  */
-export const EFFECTS = {
-    "aid": _EFFECT_INFO["aid"],
-    "bane": _EFFECT_INFO["bane"],
-    "bark": _EFFECT_INFO["barkskin"],
-    "barkskin": _EFFECT_INFO["barkskin"],
-    "bless": _EFFECT_INFO["bless"],
-    "bb": _EFFECT_INFO["blood-boil"],
-    "blood-boil": _EFFECT_INFO["blood-boil"],
-    "confusion": _EFFECT_INFO["confusion"],
-    "df": _EFFECT_INFO["divine-favor"],
-    "divine-favor": _EFFECT_INFO["divine-favor"],
-    "enlarge": _EFFECT_INFO["enlarge"],
-    "ensnaring-strike": _EFFECT_INFO["ensnaring-strike"],
-    "es": _EFFECT_INFO["ensnaring-strike"],
-    "gash": _EFFECT_INFO["gash"],
-    "goa": _EFFECT_INFO["gift-of-alacrity"],
-    "gift-of-alacrity": _EFFECT_INFO["gift-of-alacrity"],
-    "greater-malison": _EFFECT_INFO["greater-malison"],
-    "gm": _EFFECT_INFO["greater-malison"],
-    "guidance": _EFFECT_INFO["guidance"],
-    "heroism": _EFFECT_INFO["heroism"],
-    "ii": _EFFECT_INFO["id-insinuation"],
-    "id-insinuation": _EFFECT_INFO["id-insinuation"],
-    "im": _EFFECT_INFO["immolation"],
-    "immolation": _EFFECT_INFO["immolation"],
-    "ib": _EFFECT_INFO["initiative-bonus"],
-    "init-bonus": _EFFECT_INFO["initiative-bonus"],
-    "initiative-bonus": _EFFECT_INFO["initiative-bonus"],
-    "kw": _EFFECT_INFO["killing-winds"],
-    "killing-winds": _EFFECT_INFO["killing-winds"],
-    "lace": _EFFECT_INFO["lacerated"],
-    "lacerated": _EFFECT_INFO["lacerated"],
-    "maa": _EFFECT_INFO["melfs-acid-arrow"],
-    "acid-arrow": _EFFECT_INFO["melfs-acid-arrow"],
-    "melfs-acid-arrow": _EFFECT_INFO["melfs-acid-arrow"],
-    "pk": _EFFECT_INFO["phantasmal-killer"],
-    "pkiller": _EFFECT_INFO["phantasmal-killer"],
-    "phantasmal-killer": _EFFECT_INFO["phantasmal-killer"],
-    "reduce": _EFFECT_INFO["reduce"],
-    "rb": _EFFECT_INFO["reality-break"],
-    "rbreak": _EFFECT_INFO["reality-break"],
-    "reality-break": _EFFECT_INFO["reality-break"],
-    "regen": _EFFECT_INFO["regenerate"],
-    "regenerate": _EFFECT_INFO["regenerate"],
-    "sm": _EFFECT_INFO["searing-smite"],
-    "searing-smite": _EFFECT_INFO["searing-smite"],
-    "ss": _EFFECT_INFO["synaptic-static"],
-    "synaptic-static": _EFFECT_INFO["synaptic-static"],
-    "tcb": _EFFECT_INFO["tashas-caustic-brew"],
-    "caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
-    "tashas-caustic-brew": _EFFECT_INFO["tashas-caustic-brew"],
-    "vs": _EFFECT_INFO["vitriolic-sphere"],
-    "vsphere": _EFFECT_INFO["vitriolic-sphere"],
-    "vitriolic-sphere": _EFFECT_INFO["vitriolic-sphere"],
-    "vp": _EFFECT_INFO["voracious-poison"],
-    "vpoison": _EFFECT_INFO["voracious-poison"],
-    "voracious-poison": _EFFECT_INFO["voracious-poison"],
-    "weird": _EFFECT_INFO["weird"],
-};
+export const EFFECTS = {};
+for (const info of Object.values(_EFFECT_INFO)) {
+    for (const alias of info.commands.split("|").map(s => s.trim())) {
+        EFFECTS[alias] = info;
+    }
+}
 
 /**
- * Converts an effect to a chat message upon application.
- * @param {String} effectId The id of the effect to convert
- * @param {String} preText Prefix for what the effect does
- * @param {String} effectValue How much damage/healing/other is the effect doing
- * @param {String} postText The suffix for what the effect does
- * @param {String} value The value associated with the effect to pass to the callback
- * @returns A string with the effect data to be put into chat.
+ * Build a chat message announcing that an effect was applied.
+ * Includes token names (with proper comma/and formatting) and an Apply Effect button.
+ * @param {string} effectId The effect ID key (used in the button's data attribute)
+ * @param {string} text Human-readable description of what the effect does
+ * @param {string} [userValue] The user-supplied value for the effect (may be empty)
+ * @returns {string} HTML string for the chat message
  */
 function _toChatMessage(effectId, text, userValue) {
-    // Join the token names and select the target verb
     let targets = Object.values(targetedTokens).map(t => t.name).join(", ");
     let targetVerb = "is";
-    // Fix the last comma into an 'and' if there are more than 1 token and update the verb
+    // Convert the last comma to "and" for natural language (e.g. "Foo, Bar and Baz")
     if(Object.values(targetedTokens).length > 1) {
-        var pos = targets.lastIndexOf(',');
+        const pos = targets.lastIndexOf(',');
         targets = targets.substring(0, pos) + " and " + targets.substring(pos + 1);
         targetVerb = "are";
     };
-    // Use the default value if the other value is not given
     const value = userValue || "";
-    // Define the apply button for other users
-    const button = `<button class='mae-apply-effect' data-effect-id=${effectId} data-effect-value=${value}><i class="fas fa-hand-holding-magic"></i>Apply Effect</button>`;
-    // return the code
+    // HTML-escape interpolated values to prevent XSS via chat command injection
+    const esc = (s) => String(s).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+    const button = `<button class='mae-apply-effect' data-effect-id='${esc(effectId)}' data-effect-value='${esc(value)}'><i class="fas fa-hand-holding-magic"></i>Apply Effect</button>`;
     return `${targets} ${targetVerb} now ${text}. ${button}`;
 };

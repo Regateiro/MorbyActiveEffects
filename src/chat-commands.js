@@ -2,8 +2,8 @@ import { EFFECTS } from "./effect-data.js";
 import { targetedTokens, effectsAPI } from "./morby-active-effects.js";
 
 /**
- * Register the mae command with Foundry
- * @param {*} commands
+ * Register the /mae chat command with Foundry's chat-commands library.
+ * @param {*} commands The commands API from the chat-commands module
  */
 export function cm_register(commands) {
     commands.register({
@@ -19,35 +19,30 @@ export function cm_register(commands) {
 };
 
 /**
- * Handle a chat command
- * @param {*} chat
- * @param {*} parameters
- * @param {*} messageData
- * @returns
+ * Handle the /mae chat command.
+ * Two sub-commands: /mae <effect> [value] to apply, /mae clear <effect> to remove.
+ * @param {*} _chat Chat context (unused)
+ * @param {string} parameters Raw parameter string from the command
+ * @param {*} _messageData Message data (unused)
+ * @returns {Object} Empty object (expected by the chat-commands library)
  */
 async function handleCommand(_chat, parameters, _messageData) {
-    // Split the parameters into separate fields
+    if (!effectsAPI) return {};
     parameters = parameters.toLowerCase().split(" ");
 
-    // If the first parameter corresponds to an effect
-    if(Object.keys(targetedTokens).length > 0 && Object.keys(EFFECTS).includes(parameters[0])) {
-        // Get the effect information
+    // Apply effect: /mae <alias> [value]
+    if (Object.keys(targetedTokens).length > 0 && parameters[0] in EFFECTS) {
         const effectInfo = EFFECTS[parameters[0]];
-        // For each token that is selected
-        let effectMsg = effectInfo.toChatMessage(parameters[1]);
+        const effectMsg = effectInfo.toChatMessage(parameters[1]);
         await applyEffectToAllTargets(parameters[0], parameters[1]);
         if (effectMsg) {
             await ChatMessage.create({content: effectMsg});
         };
-    // If the first parameter is a clear command
-    } else if (parameters[0] == "clear") {
-        // Determine if the second parameter corresponds to an effect
-        if(Object.keys(EFFECTS).includes(parameters[1])) {
-            // Get the effect information
+    // Remove effect: /mae clear <alias>
+    } else if (parameters[0] === "clear") {
+        if (parameters[1] in EFFECTS) {
             const effectInfo = EFFECTS[parameters[1]];
-            // For each token that is selected
             for (const token of Object.values(targetedTokens)) {
-                // Remove any effect with the same name
                 await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
             };
         };
@@ -57,52 +52,59 @@ async function handleCommand(_chat, parameters, _messageData) {
 };
 
 /**
- * Apply an effect to all targeted tokens
- * @param {String} effectId 
- * @param {String} value 
+ * Apply an effect to every currently targeted token.
+ * Removes any existing effect with the same name first, then builds and adds the new one.
+ * @param {string} effectId The alias key in EFFECTS (e.g. "bb", "aid")
+ * @param {string} [value] User-supplied override value for unlocked effects
  */
 export async function applyEffectToAllTargets(effectId, value) {
+    if (!effectsAPI) return;
     const effectInfo = EFFECTS[effectId];
+    if (!effectInfo) return;
     for (const token of Object.values(targetedTokens)) {
-        // Remove any effect with the same name
+        // Remove any existing effect with the same name (prevents stacking)
         await effectsAPI.removeEffectOnToken(token.id, effectInfo.name);
-        // Create a new effect
+        // Build the effect via the library
         const effect = await effectsAPI.buildDefault(null, effectInfo.name, effectInfo.icon);
         effect.origin = `Actor.${token.document.actorId}`;
         effect.isTemporary = Boolean(effectInfo.seconds);
         effect.seconds = effectInfo.seconds;
         effect.turns = null;
         effect.rounds = null;
+        // Apply each change, potentially modified by handleDynamicChanges
         for (const change of effectInfo.changes) {
             effect.changes.push(
                 await handleDynamicChanges(effectInfo, token, change, value)
             );
         };
-        // Add the effect to the token
         await effectsAPI.addEffectOnToken(token.id, effectInfo.name, effect);
-        // If the effect is Aid, heal the target as well on application
-        if (effectInfo.id == "aid") {
+        // Aid is special: on application it also heals the target
+        if (effectInfo.id === "aid") {
             await token.actor.applyDamage(-Number(value));
         };
     };
 };
 
 /**
- * Modify the effect change given the token context
- * @param {String} effectInfo 
- * @param {Token5e} token 
- * @param {Object} change 
- * @param {String} value 
- * @returns The modified change object
+ * Modify an effect's change value based on the token's current state.
+ * Handles dynamic sizing for Enlarge/Reduce (computes ±1 or ±half based on current token dims).
+ * @param {Object} effectInfo The effect definition from _EFFECT_INFO
+ * @param {Token} token The targeted token (for sizing calculations)
+ * @param {Object} change The raw change object from the effect definition
+ * @param {string} [value] User-supplied override value
+ * @returns {Object} The modified change object with updated value
  */
-async function handleDynamicChanges(effectInfo, token, change, value) {
+/** @visibleForTesting */
+export async function handleDynamicChanges(effectInfo, token, change, value) {
     change = Object.assign({}, change);
+    // Unlocked effects accept the user-supplied value; locked effects keep their default
     if (!effectInfo.locked) {
         change.value = value || change.value;
     };
 
     switch (effectInfo.id) {
         case "reduce":
+            // Reduce by 1 square (or half if already <= 1)
             if (change.key.includes("height")) {
                 const currentHeight = Number(token.document.height);
                 change.value = currentHeight <= 1 ? -currentHeight / 2 : -1;
@@ -113,6 +115,7 @@ async function handleDynamicChanges(effectInfo, token, change, value) {
             };
             break;
         case "enlarge":
+            // Increase by 1 square (or double if already <= 1)
             if (change.key.includes("height")) {
                 const currentHeight = Number(token.document.height);
                 change.value = currentHeight <= 1 ? currentHeight : 1;
@@ -128,62 +131,57 @@ async function handleDynamicChanges(effectInfo, token, change, value) {
 }
 
 /**
- * Handle requests for chat autocomplete
- * @param {*} menu
- * @param {*} alias
- * @param {*} parameters
- * @returns
+ * Provide autocomplete suggestions for the /mae command.
+ * Single-parameter mode: suggest matching effect aliases (deduped by commands field).
+ * Two-parameter mode: /mae clear <alias> suggests aliases; /mae <alias> shows help text.
+ * @param {*} menu The autocomplete menu (provides maxEntries and helper methods)
+ * @param {string} alias The alias parameter (unused, raw parameters used instead)
+ * @param {string} parameters The raw parameter string from the chat input
+ * @returns {Array} Array of autocomplete entry elements
  */
 function handleAutoComplete(menu, alias, parameters) {
-    // Split the parameters into separate fields
     parameters = parameters.toLowerCase().split(" ");
-    const special = ["clear", "amthp"];
 
-    // Create an empty list of autocomplete entries
     let entries = [];
+    const seen = new Set();
 
-    // If the first parameter is being written
-    if(parameters.length == 1) {
-        // Add all the effect entries that match the start of the first parameter
-        Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[0])).forEach(effect => {
-            if(!entries.find((entry) => entry.textContent == EFFECTS[effect].commands)) {
-                entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
-            };
-        });
-        // Add a separator if there are normal entries and special command entries
-        if(entries.length > 0 && special.find(c => c.startsWith(parameters[0]))) {
-            entries.length = Math.min(entries.length, menu.maxEntries - special.length - 1);
+    // First parameter: autocomplete effect aliases
+    if (parameters.length === 1) {
+        for (const alias in EFFECTS) {
+            if (!alias.startsWith(parameters[0])) continue;
+            if (seen.has(EFFECTS[alias].commands)) continue;
+            seen.add(EFFECTS[alias].commands);
+            entries.push(game.chatCommands.createInfoElement(EFFECTS[alias].commands));
+        }
+        // If "clear" also matches, add a separator before it
+        if (entries.length > 0 && "clear".startsWith(parameters[0])) {
+            entries.length = Math.min(entries.length, menu.maxEntries - 2);
             entries.push(game.chatCommands.createSeparatorElement());
         }
-        // If the first parameter is matching the start of the clear command
-        if("clear".startsWith(parameters[0])) {
-            // Add clear as a possible command to the autocompletion
+        if ("clear".startsWith(parameters[0])) {
             entries.push(game.chatCommands.createInfoElement("clear - remove effect from token"));
-        };
-    // if the second parameter is being written
-    } else if(parameters.length == 2) {
-        switch(parameters[0]) {
-            // If the first parameter is a clear command
+        }
+    // Second parameter: depends on the first
+    } else if (parameters.length === 2) {
+        switch (parameters[0]) {
             case "clear":
-                // Add all the effect entries that match the start of the second parameter
-                Object.keys(EFFECTS).filter(effect => effect.startsWith(parameters[1])).forEach(effect => {
-                    if(!entries.find((entry) => entry.textContent == EFFECTS[effect].commands)) {
-                        entries.push(game.chatCommands.createInfoElement(EFFECTS[effect].commands));
-                    };
-                });
+                // /mae clear <alias> — suggest matching aliases
+                for (const alias in EFFECTS) {
+                    if (!alias.startsWith(parameters[1])) continue;
+                    if (seen.has(EFFECTS[alias].commands)) continue;
+                    seen.add(EFFECTS[alias].commands);
+                    entries.push(game.chatCommands.createInfoElement(EFFECTS[alias].commands));
+                }
                 break;
             default:
-                // Otherwise, add the help description of the effect specified in the first parameter
-                if(Object.keys(EFFECTS).includes(parameters[0]) && EFFECTS[parameters[0]].help) {
+                // /mae <alias> — show the effect's help text if available
+                if (parameters[0] in EFFECTS && EFFECTS[parameters[0]].help) {
                     entries.push(game.chatCommands.createInfoElement(EFFECTS[parameters[0]].help));
-                };
+                }
                 break;
-        };
-    };
+        }
+    }
 
-    // Trim the entry list
     entries.length = Math.min(entries.length, menu.maxEntries);
-
-    // Return the autocomplete entries
     return entries;
 };

@@ -64,6 +64,4 @@ Look into the Smart Target configuration options if you'd rather use sticky targ
 
 ## Future Module Features
 
-In the future, support for effects similar to the ones already supported but that only trigger on a failed save each turn will be implemented. This will most likely require the player to roll the saving throw and then click on a button in chat indicating if the saving throw was a success or a failure.
-
-Furthermore, a GUI to apply the effects on targeted token is being considered so that players are not required to use the chat commands.
+A GUI to apply the effects on targeted tokens is being considered so that players are not required to use the chat commands.
