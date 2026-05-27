@@ -124,7 +124,7 @@ export async function handleTurnEndEffects(combat) {
 
     const netDamage = damageByCombatant[combatant._id];
     delete damageByCombatant[combatant._id];
-    if (netDamage > 0) {
+    if (netDamage !== 0) {
         await actor.applyDamage(netDamage);
     }
 };
