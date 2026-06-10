@@ -1,5 +1,5 @@
 import { applyEffectToAllTargets, cm_register } from "./chat-commands.js";
-import { applyDamage, handleResolvedSaveRequest, handleTurnEndEffects, handleTurnStartEffects, resetCombatState } from "./effects.js";
+import { applyDamage, getCombatant, handleResolvedSaveRequest, handleTurnEndEffects, handleTurnStartEffects, resetCombatState } from "./effects.js";
 
 /** Active-effect-manager-lib API, set once on ready */
 export let effectsAPI = null;
@@ -26,16 +26,14 @@ Hooks.once("ready", () => {
             await applyEffectToAllTargets($(this).data('effect-id'), $(this).data('effect-value'));
         })
         .on(`click${ns}`, '.mae-save-roll', async function () {
-            const combatant = game.combat.combatants.get($(this).data('combatant-id'));
-            if (!combatant) return;
-            const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+            const { actor } = getCombatant($(this).data('combatant-id'));
             if (!actor) return;
             const abilityId = $(this).data('ability-id');
             await actor.rollAbilitySave(abilityId.toLowerCase());
         })
         .on(`click${ns}`, '.mae-save-success', async function () {
             if (!effectsAPI) return;
-            const combatant = game.combat.combatants.get($(this).data('combatant-id'));
+            const { combatant } = getCombatant($(this).data('combatant-id'));
             if (!combatant) return;
             const formula = $(this).data('effect-formula');
             const effectName = $(this).data('effect-name');
@@ -57,7 +55,7 @@ Hooks.once("ready", () => {
             await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
         })
         .on(`click${ns}`, '.mae-save-failure', async function () {
-            const combatant = game.combat.combatants.get($(this).data('combatant-id'));
+            const { combatant } = getCombatant($(this).data('combatant-id'));
             if (!combatant) return;
             const formula = $(this).data('effect-formula');
             const effectName = $(this).data('effect-name');

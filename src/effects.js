@@ -13,6 +13,35 @@ export function resetCombatState() {
 }
 
 /**
+ * Resolve a combatant by ID and its associated actor.
+ * @param {string} combatantId
+ * @returns {{combatant: object|null, actor: object|null}}
+ */
+export function getCombatant(combatantId) {
+    const combatant = game.combat?.combatants?.get(combatantId);
+    if (!combatant) return { combatant: null, actor: null };
+    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
+    return { combatant, actor };
+}
+
+/**
+ * Evaluate a dice formula. Returns the Roll object or null on failure.
+ * @param {string} formula
+ * @param {string} label Used in error messages (e.g. "HP", "damage")
+ * @returns {Roll|null}
+ */
+async function evaluateFormula(formula, label) {
+    try {
+        const roll = new Roll(String(formula));
+        await roll.evaluate({async: true});
+        return roll;
+    } catch (err) {
+        console.error(`Morby Active Effects | invalid ${label} formula`, formula, err);
+        return null;
+    }
+}
+
+/**
  * Registry of effects processed at the start of a combatant's turn.
  * Each entry maps a flags.mae key to an async handler receiving (combatant, actor, value, timestamp).
  * The handler return value (0 or 1) is added to the save-request count for Regenerate deferral.
@@ -57,10 +86,8 @@ const TURN_END_EFFECTS = [
  */
 export async function handleTurnStartEffects(combat) {
     if (!combat.current) return;
-    const combatant = combat.combatants.get(combat.current.combatantId);
-    if (!combatant) return;
-    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    if (!actor) return;
+    const { combatant, actor } = getCombatant(combat.current.combatantId);
+    if (!combatant || !actor) return;
 
     // Initialize the per-combatant damage accumulator for this turn phase
     damageByCombatant[combatant._id] = 0;
@@ -107,10 +134,8 @@ export async function handleTurnStartEffects(combat) {
  */
 export async function handleTurnEndEffects(combat) {
     if (!combat.previous) return;
-    const combatant = combat.combatants.get(combat.previous.combatantId);
-    if (!combatant) return;
-    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    if (!actor) return;
+    const { combatant, actor } = getCombatant(combat.previous.combatantId);
+    if (!combatant || !actor) return;
 
     damageByCombatant[combatant._id] = 0;
 
@@ -140,18 +165,10 @@ export async function handleTurnEndEffects(combat) {
  */
 /** @visibleForTesting */
 export async function applyHP(combatantId, isTemporary, formula, effectName, direct = false) {
-    const combatant = game.combat.combatants.get(combatantId);
-    if (!combatant) return;
-    const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
-    if (!actor) return;
-    let roll;
-    try {
-        roll = new Roll(String(formula));
-        await roll.evaluate({async: true});
-    } catch (err) {
-        console.error("Morby Active Effects | invalid HP formula", formula, err);
-        return;
-    }
+    const { combatant, actor } = getCombatant(combatantId);
+    if (!combatant || !actor) return;
+    const roll = await evaluateFormula(formula, "HP");
+    if (!roll) return;
 
     let extraText = "";
     if (isTemporary) {
@@ -189,21 +206,14 @@ export async function applyHP(combatantId, isTemporary, formula, effectName, dir
 export async function applyDamage(combatantId, formula, effectName, halfDamage = false, direct = false) {
     if (formula == null || formula === "") return;
 
-    const combatant = game.combat.combatants.get(combatantId);
+    const { combatant, actor } = getCombatant(combatantId);
     if (!combatant) return;
-    let roll;
-    try {
-        roll = new Roll(String(formula));
-        await roll.evaluate({async: true});
-    } catch (err) {
-        console.error("Morby Active Effects | invalid damage formula", formula, err);
-        return;
-    }
+    const roll = await evaluateFormula(formula, "damage");
+    if (!roll) return;
 
     const amount = roll.total / (halfDamage ? 2 : 1);
 
     if (direct) {
-        const actor = game.actors.tokens[combatant.tokenId] || game.actors.get(combatant.actorId);
         await actor.applyDamage(amount);
     } else {
         damageByCombatant[combatantId] = (damageByCombatant[combatantId] || 0) + amount;
@@ -225,7 +235,7 @@ export async function applyDamage(combatantId, formula, effectName, halfDamage =
  * @param {boolean} [halfDamage=false] Whether the target takes half damage on a successful save
  */
 async function requestSave(combatantId, formula, save, effectName, timestamp, removeOnSave = true, halfDamage = false) {
-    const combatant = game.combat.combatants.get(combatantId);
+    const { combatant } = getCombatant(combatantId);
     if (!combatant) return;
     const esc = (s) => String(s).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
     const roll = `<button class='mae-save-roll' data-combatant-id='${esc(combatantId)}' data-ability-id='${esc(save)}'><i class="fas fa-dice-d20"></i>Roll ${esc(save)} Save</button>`;
@@ -242,7 +252,7 @@ async function requestSave(combatantId, formula, save, effectName, timestamp, re
  */
 /** @visibleForTesting */
 export async function handleRealityBreak(combatantId, timestamp) {
-    const combatant = game.combat.combatants.get(combatantId);
+    const { combatant } = getCombatant(combatantId);
     if (!combatant) return 0;
     const roll = new Roll("1d10");
     await roll.evaluate({async: true});
@@ -294,7 +304,7 @@ const CONFUSION_DIRECTIONS = ["North", "Northeast", "East", "Southeast", "South"
  */
 /** @visibleForTesting */
 export async function handleConfusion(combatantId) {
-    const combatant = game.combat.combatants.get(combatantId);
+    const { combatant } = getCombatant(combatantId);
     if (!combatant) return;
     const roll = new Roll("1d10");
     await roll.evaluate({async: true});
