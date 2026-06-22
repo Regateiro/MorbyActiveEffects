@@ -50,13 +50,13 @@ const TURN_START_EFFECTS = [
     { flag: "heroismTempHP", handler: async (c, _a, v) => { await applyHP(c._id, true, v, "Heroism"); } },
     { flag: "lacerated", handler: async (c, _a, v) => { await applyDamage(c._id, v, "being lacerated"); } },
     { flag: "gashed", handler: async (c, _a, v) => { await applyDamage(c._id, v, "being gashed"); } },
-    { flag: "acid", handler: async (c, _a, v) => { await applyDamage(c._id, v, "being exposed to acid"); } },
-    { flag: "burning", handler: async (c, _a, v) => { await applyDamage(c._id, v, "being on fire"); } },
+    { flag: "acid", handler: async (c, _a, v) => { await applyDamage(c._id, v, "being exposed to acid", false, false, "acid"); } },
+    { flag: "burning", handler: async (c, _a, v) => { await applyDamage(c._id, v, "being on fire", false, false, "fire"); } },
     { flag: "estrike", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Ensnaring Strike"); } },
-    { flag: "causticbrew", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Tasha's Caustic Brew"); } },
+    { flag: "causticbrew", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Tasha's Caustic Brew", false, false, "acid"); } },
     { flag: "rbreak", handler: async (c, _a, _v, ts) => handleRealityBreak(c._id, ts) },
     { flag: "confusion", handler: async (c) => { await handleConfusion(c._id); } },
-    { flag: "searingsmite", handler: async (c, a, v, ts) => { await requestSave(c._id, v, "CON", "Searing Smite", ts); return 1; } },
+    { flag: "searingsmite", handler: async (c, a, v, ts) => { await requestSave(c._id, "CON", "Searing Smite", { formula: v, timestamp: ts, damageType: "fire" }); return 1; } },
 ];
 
 /**
@@ -65,21 +65,23 @@ const TURN_START_EFFECTS = [
  * (no save-deferred triggers originate from end-of-turn effects).
  */
 const TURN_END_EFFECTS = [
-    { flag: "idinsinuation", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Id Insinuation"); } },
-    { flag: "acidarrow", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Melf's Acid Arrow"); await effectsAPI.removeEffectOnToken(c.tokenId, "Melf's Acid Arrow"); } },
-    { flag: "vsphere", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Vitriolic Sphere"); await effectsAPI.removeEffectOnToken(c.tokenId, "Vitriolic Sphere"); } },
-    { flag: "lacerated", handler: async (c) => { await requestSave(c._id, "", "CON", "Lacerated"); } },
-    { flag: "gashed", handler: async (c) => { await requestSave(c._id, "", "CON", "Gashed"); } },
-    { flag: "greaterMalison", handler: async (c) => { await requestSave(c._id, "", "CHA", "Greater Malison"); } },
-    { flag: "bloodboil", handler: async (c, _a, v) => { await requestSave(c._id, v, "CON", "Blood Boil"); } },
-    { flag: "immolation", handler: async (c, _a, v) => { await requestSave(c._id, v, "DEX", "Immolation"); } },
-    { flag: "killingwinds", handler: async (c, _a, v) => { await requestSave(c._id, v, "CON", "Killing Winds"); } },
-    { flag: "pkiller", handler: async (c, _a, v) => { await requestSave(c._id, v, "WIS", "Phantasmal Killer"); } },
-    { flag: "vpoison", handler: async (c, _a, v) => { await requestSave(c._id, v, "CON", "Voracious Poison"); } },
-    { flag: "weird", handler: async (c, _a, v) => { await requestSave(c._id, v, "WIS", "Weird"); } },
-    { flag: "synapticstatic", handler: async (c) => { await requestSave(c._id, "", "INT", "Synaptic Static"); } },
-    { flag: "rbreak", handler: async (c) => { await requestSave(c._id, "", "WIS", "Reality Break"); } },
-    { flag: "confusion", handler: async (c) => { await requestSave(c._id, "", "WIS", "Confusion"); } },
+    { flag: "idinsinuation", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Id Insinuation", false, false, "psychic"); } },
+    { flag: "acidarrow", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Melf's Acid Arrow", false, false, "acid"); await effectsAPI.removeEffectOnToken(c.tokenId, "Melf's Acid Arrow"); } },
+    { flag: "vsphere", handler: async (c, _a, v) => { await applyDamage(c._id, v, "Vitriolic Sphere", false, false, "acid"); await effectsAPI.removeEffectOnToken(c.tokenId, "Vitriolic Sphere"); } },
+    { flag: "lacerated", handler: async (c) => { await requestSave(c._id, "CON", "Lacerated", {}); } },
+    { flag: "gashed", handler: async (c) => { await requestSave(c._id, "CON", "Gashed", {}); } },
+    { flag: "acid", handler: async (c) => { await requestSave(c._id, "DEX", "Acid", {}); } },
+    { flag: "burning", handler: async (c) => { await requestSave(c._id, "DEX", "Burning", {}); } },
+    { flag: "greaterMalison", handler: async (c) => { await requestSave(c._id, "CHA", "Greater Malison", {}); } },
+    { flag: "bloodboil", handler: async (c, _a, v) => { await requestSave(c._id, "CON", "Blood Boil", { formula: v, damageType: "fire" }); } },
+    { flag: "immolation", handler: async (c, _a, v) => { await requestSave(c._id, "DEX", "Immolation", { formula: v, damageType: "fire" }); } },
+    { flag: "killingwinds", handler: async (c, _a, v) => { await requestSave(c._id, "CON", "Killing Winds", { formula: v, damageType: "acid" }); } },
+    { flag: "pkiller", handler: async (c, _a, v) => { await requestSave(c._id, "WIS", "Phantasmal Killer", { formula: v, damageType: "psychic" }); } },
+    { flag: "vpoison", handler: async (c, _a, v) => { await requestSave(c._id, "CON", "Voracious Poison", { formula: v, damageType: "poison" }); } },
+    { flag: "weird", handler: async (c, _a, v) => { await requestSave(c._id, "WIS", "Weird", { formula: v, damageType: "psychic" }); } },
+    { flag: "synapticstatic", handler: async (c) => { await requestSave(c._id, "INT", "Synaptic Static", {}); } },
+    { flag: "rbreak", handler: async (c) => { await requestSave(c._id, "WIS", "Reality Break", {}); } },
+    { flag: "confusion", handler: async (c) => { await requestSave(c._id, "WIS", "Confusion", {}); } },
 ];
 
 /**
@@ -197,6 +199,38 @@ export async function applyHP(combatantId, isTemporary, formula, effectName, dir
 };
 
 /**
+ * Compute a damage multiplier based on the actor's damage resistance/vulnerability/immunity.
+ * @param {object} actor The actor document
+ * @param {string|null} damageType The damage type (e.g. "fire", "acid")
+ * @returns {number} 0 (immune), 0.5 (resistant), 2 (vulnerable), or 1 (normal)
+ */
+function getDamageMultiplier(actor, damageType) {
+    // If nothing is known, assume normal damage
+    if (!damageType || !actor?.system?.traits) return 1;
+
+    // Get Actor traits (damage resistance, immunity and vulnerability)
+    const t = actor.system.traits;
+    // Helper function to determine if an actor has a damage type trait
+    const has = (set, type) => set?.value?.includes?.(type) || set?.value?.has?.(type) || false;
+
+    // If the actor has damageType immunity, damage multiplier is 0
+    if (has(t.di, damageType)) return 0;
+
+    // Process resistance and vulnerability
+    const vuln = has(t.dv, damageType);
+    const resist = has(t.dr, damageType);
+    // If the actor is both, do normal damage
+    if (vuln && resist) return 1;
+    // If the actor is vulnerable to the damageType, double it
+    if (vuln) return 2;
+    // If the actor resists the damageType, halve it
+    if (resist) return 0.5;
+
+    // If there is no associated trait, do normal damage
+    return 1;
+}
+
+/**
  * Apply damage to a combatant.
  * @param {string} combatantId The combatant._id to apply damage to
  * @param {string} formula Dice formula to roll (e.g. "6d12")
@@ -204,23 +238,29 @@ export async function applyHP(combatantId, isTemporary, formula, effectName, dir
  * @param {boolean} [halfDamage=false] Whether to halve the rolled damage
  * @param {boolean} [direct=false] true = apply directly to actor (save-click handler);
  *   false = accumulate into damageByCombatant for later flush (turn processing)
+ * @param {string|null} [damageType=null] Damage type for resistance/vulnerability checks
  */
-export async function applyDamage(combatantId, formula, effectName, halfDamage = false, direct = false) {
+export async function applyDamage(combatantId, formula, effectName, halfDamage = false, direct = false, damageType = null) {
     if (formula == null || formula === "") return;
 
+    // Ensure combatant and roll
     const { combatant, actor } = getCombatant(combatantId);
     if (!combatant) return;
     const roll = await evaluateFormula(formula, "damage");
     if (!roll) return;
 
-    const amount = roll.total / (halfDamage ? 2 : 1);
+    // Determine the amount of damage to apply
+    const mult = getDamageMultiplier(actor, damageType);
+    const amount = Math.floor(Math.floor(roll.total / (halfDamage ? 2 : 1)) * mult);
 
+    // Apply the damage immediatly if direct or accumulate it
     if (direct) {
         await actor.applyDamage(amount);
     } else {
         damageByCombatant[combatantId] = (damageByCombatant[combatantId] || 0) + amount;
     }
 
+    // Show a chat message with the damage application
     await roll.toMessage({ sound: null, speaker: null,
         flavor: `${combatant.name} suffers ${amount} points of damage from ${effectName}!`
     }, {rollMode: "public"});
@@ -229,20 +269,32 @@ export async function applyDamage(combatantId, formula, effectName, halfDamage =
 /**
  * Send a whisper to the GM with Roll Save, Success, and Failure buttons.
  * @param {string} combatantId The combatant._id that must make the save
- * @param {string} formula Dice formula for damage on a failed save (may be empty string)
  * @param {string} save Ability abbreviation: STR, DEX, CON, INT, WIS, CHA
  * @param {string} effectName Display name of the source effect
- * @param {string} timestamp Batch identifier for save-request counting / Regenerate deferral
- * @param {boolean} [removeOnSave=true] Whether to remove the effect on a successful save
- * @param {boolean} [halfDamage=false] Whether the target takes half damage on a successful save
+ * @param {Object} [opts={}] Options
+ * @param {string} [opts.formula=""]  Dice formula for damage on a failed save
+ * @param {string} [opts.timestamp]   Batch identifier for save-request counting / Regenerate deferral
+ * @param {boolean} [opts.removeOnSave=true] Whether to remove the effect on a successful save
+ * @param {boolean} [opts.halfDamage=false]  Whether the target takes half damage on a successful save
+ * @param {string|null} [opts.damageType=null] Damage type for resistance/vulnerability on save damage
  */
-async function requestSave(combatantId, formula, save, effectName, timestamp, removeOnSave = true, halfDamage = false) {
+async function requestSave(combatantId, save, effectName, opts = {}) {
+    const { formula = "", timestamp, removeOnSave = true, halfDamage = false, damageType = null } = opts;
     const { combatant } = getCombatant(combatantId);
     if (!combatant) return;
+    // Escape helper function
     const esc = (s) => String(s).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-    const roll = `<button class='mae-save-roll' data-combatant-id='${esc(combatantId)}' data-ability-id='${esc(save)}'><i class="fas fa-dice-d20"></i>Roll ${esc(save)} Save</button>`;
-    const success = `<button class='mae-save-success' data-combatant-id='${esc(combatantId)}' data-effect-name='${esc(effectName)}' data-effect-formula='${esc(formula)}' data-remove='${esc(removeOnSave)}' data-half-damage='${esc(halfDamage)}' data-timestamp='${esc(timestamp)}'><i class="fas fa-check"></i>Success</button>`;
-    const fail = `<button class='mae-save-failure' data-combatant-id='${esc(combatantId)}' data-effect-name='${esc(effectName)}' data-effect-formula='${esc(formula)}' data-timestamp='${esc(timestamp)}'><i class="fas fa-xmark"></i>Failure</button>`;
+    // Attribute builder helper function
+    const attr = (obj) => Object.entries(obj)
+        .filter(([, v]) => v !== null && v !== undefined)
+        .map(([k, v]) => `data-${k}='${esc(v)}'`).join(' ');
+    // Base attributes
+    const base = { "combatant-id": combatantId, "effect-name": effectName, "effect-formula": formula, timestamp, "damage-type": damageType };
+    // Define the html buttons using the attributes
+    const roll = `<button class='mae-save-roll' ${attr({ "combatant-id": combatantId, "ability-id": save })}><i class="fas fa-dice-d20"></i>Roll ${esc(save)} Save</button>`;
+    const success = `<button class='mae-save-success' ${attr({ ...base, remove: removeOnSave, "half-damage": halfDamage })}><i class="fas fa-check"></i>Success</button>`;
+    const fail = `<button class='mae-save-failure' ${attr(base)}><i class="fas fa-xmark"></i>Failure</button>`;
+    // Display chat message
     await ChatMessage.create({content: `${combatant.name} must roll a(n) ${save} save against ${effectName}. <hr/> ${roll} <hr/> ${success} ${fail}`, whisper: game.userId});
 };
 
@@ -275,7 +327,7 @@ export async function handleRealityBreak(combatantId, timestamp) {
             await roll.toMessage({ sound: null, speaker: null,
                 flavor: `Reality Break: ${combatant.name} is swallowed by a Rending Rift!`
             }, {rollMode: "public"});
-            await requestSave(combatantId, "8d12", "DEX", "Reality Break's Rending Rift", timestamp, false, true);
+            await requestSave(combatantId, "DEX", "Reality Break's Rending Rift", { formula: "8d12", timestamp, removeOnSave: false, halfDamage: true });
             return 1;
         case 6:
         case 7:

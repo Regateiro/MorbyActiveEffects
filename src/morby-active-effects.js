@@ -40,6 +40,7 @@ Hooks.once("ready", () => {
             const removeEffect = Boolean($(this).data('remove'));
             const halfDamage = Boolean($(this).data('half-damage'));
             const timestamp = $(this).data('timestamp');
+            const damageType = $(this).data('damage-type') || null;
 
             // Remove the effect if the save removes it
             if (removeEffect) {
@@ -47,7 +48,7 @@ Hooks.once("ready", () => {
             };
             // Apply half damage if the effect deals half on a successful save
             if (halfDamage) {
-                await applyDamage(combatant.id, formula, effectName, true, true);
+                await applyDamage(combatant.id, formula, effectName, true, true, damageType);
             };
             // Decrement pending save counter and fire deferred triggers if all resolved
             await handleResolvedSaveRequest(timestamp);
@@ -60,9 +61,10 @@ Hooks.once("ready", () => {
             const formula = $(this).data('effect-formula');
             const effectName = $(this).data('effect-name');
             const timestamp = $(this).data('timestamp');
+            const damageType = $(this).data('damage-type') || null;
 
             // Apply full damage on a failed save (direct = true, bypasses the per-combatant accumulator)
-            await applyDamage(combatant.id, formula, effectName, false, true);
+            await applyDamage(combatant.id, formula, effectName, false, true, damageType);
             await handleResolvedSaveRequest(timestamp);
             await game.messages.get($(this).closest(".chat-message").data('message-id'), false).delete();
         });
