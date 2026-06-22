@@ -11,9 +11,11 @@ The list of supported effects/conditions is shown in the table below.
 | Effect Name          | Description                                     | Custom Value (Default) | Command                        | Aliases           |
 | -------------------- | ----------------------------------------------- | ---------------------- | ------------------------------ | ----------------- |
 | Aid                  | +X to current and maximum HP                    | Yes (5)                | /mae aid \<X\>                 |                   |
+| Acid                 | +X acid damage at the start of turn             | Yes (0)                | /mae acid \<X\>                |                   |
 | Bane                 | -1d4 to attacks and saving throws               | No                     | /mae bane                      |                   |
 | Barkskin             | 16 minimum to AC                                | No                     | /mae barkskin                  | bark              |
 | Bless                | +1d4 to attacks and saving throws               | No                     | /mae bless                     |                   |
+| Burning              | +X fire damage at the start of turn             | Yes (0)                | /mae burning \<X\>             | burn              |
 | Confusion            | Random actions each turn                        | No                     | /mae confusion                 |                   |
 | Divine Favor         | +1d4 to weapon damage                           | No                     | /mae divine-favor              | df                |
 | Blood Boil           | +7d6 damage at the end of turn on failed save   | No                     | /mae blood-boil                | bb                |

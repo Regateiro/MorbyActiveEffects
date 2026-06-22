@@ -29,6 +29,19 @@ const _EFFECT_INFO = {
         help: "Bonus to be applied by aid. Defaults to 5.",
         toChatMessage: function (value) { return _toChatMessage("aid", `aided with an extra ${value || "5"} current and maximum HP`, value); }
     },
+    "acid": {
+        id: "acid",
+        name: "Acid",
+        icon: "icons/svg/acid.svg",
+        commands: "acid",
+        changes: [
+            {key: "flags.mae.acid", value: "0", mode: EFFECT_MODE.ADD}
+        ],
+        locked: false,
+        seconds: 60,
+        help: "Acid damage over time. Defaults to 0.",
+        toChatMessage: function (value) { return _toChatMessage("acid", `suffered ${value || "0"} acid damage from acid exposure.`, value); }
+    },
     "bane": {
         id: "bane",
         name: "Bane",
@@ -74,6 +87,19 @@ const _EFFECT_INFO = {
         locked: true,
         seconds: 60,
         toChatMessage: function () { return _toChatMessage("blood-boil", "agonized with superheated blood, taking 7d6 fire damage on a failed CON save each turn"); }
+    },
+    "burning": {
+        id: "burning",
+        name: "Burning",
+        icon: "icons/svg/fire.svg",
+        commands: "burning | burn",
+        changes: [
+            {key: "flags.mae.burning", value: "0", mode: EFFECT_MODE.ADD}
+        ],
+        locked: false,
+        seconds: 60,
+        help: "Fire damage over time. Defaults to 0.",
+        toChatMessage: function (value) { return _toChatMessage("acid", `suffered ${value || "0"} fire damage from being on fire.`, value); }
     },
     "confusion": {
         id: "confusion",
